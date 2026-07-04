@@ -5,6 +5,7 @@ from typing import Callable
 import flet as ft
 
 _CARD_WIDTH = 260
+_CARD_HEIGHT = 240
 
 
 class HomeViewMixin:
@@ -13,6 +14,7 @@ class HomeViewMixin:
             return ft.Card(
                 elevation=2,
                 width=_CARD_WIDTH,
+                height=_CARD_HEIGHT,
                 content=ft.Container(
                     padding=24,
                     on_click=on_click,
