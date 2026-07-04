@@ -13,6 +13,7 @@ A minimal, batteries-included test harness for **web** (via Playwright), **Andro
 - Screenshot-on-failure for web, Android, and iOS.
 - Tag-based filtering (`web`, `android`, `ios`).
 - JSON + HTML reports.
+- Configurable scripts/reports folders, changeable anytime from the desktop app's **Settings** tab.
 - Pure stdlib `unittest` — no heavy test framework to learn.
 
 ## Install
@@ -62,6 +63,10 @@ Use the moon/sun icon at the bottom of the navigation rail to switch between lig
 2. Select a generated script.
 3. Click **Run Selected**.
 4. View the report in **Reports**.
+
+### Settings
+
+Choose **Settings** from the navigation rail to change where generated scripts and reports are saved. Click **Change...** next to either folder to pick a new location via your OS's native folder dialog, or **Reset to default** to go back to the app's default data directory. This can be changed again at any time — it only affects new scripts/reports going forward, existing files are not moved.
 
 ## Packaging
 

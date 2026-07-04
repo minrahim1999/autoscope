@@ -21,13 +21,29 @@ def get_app_dir() -> Path:
 
 
 def get_scripts_dir() -> Path:
-    path = get_app_dir() / "scripts"
+    """Where the desktop recorders/Auto Run save and discover scripts.
+
+    Defaults to <app dir>/scripts, but the user can override this from the
+    desktop app's Settings view (persisted via autoscope.desktop.settings).
+    """
+    from autoscope.desktop.settings import get_scripts_dir_override
+
+    override = get_scripts_dir_override()
+    path = Path(override) if override else get_app_dir() / "scripts"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 def get_reports_dir() -> Path:
-    path = get_app_dir() / "var" / "reports"
+    """Where the desktop app's Auto Run/manual recorders write reports.
+
+    Defaults to <app dir>/var/reports, but the user can override this from
+    the desktop app's Settings view (persisted via autoscope.desktop.settings).
+    """
+    from autoscope.desktop.settings import get_reports_dir_override
+
+    override = get_reports_dir_override()
+    path = Path(override) if override else get_app_dir() / "var" / "reports"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

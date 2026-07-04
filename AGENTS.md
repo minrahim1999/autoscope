@@ -95,6 +95,7 @@ python run_desktop.py
 - Its platform is detected from the first-line comment, e.g. `# platform: web` or `# platform: android`.
 - The desktop **Auto Run** tab executes these scripts in a subprocess via `autoscope/desktop/runner/script_runner.py` and writes `var/reports/auto_results.json` + `var/reports/auto_report.html`.
 - Playwright browsers and `adb` are **not bundled**; the app checks for them at startup and can prompt to install Chromium.
+- The desktop **Settings** tab lets the user pick custom scripts/reports folders (native OS dialog, `autoscope/desktop/folder_picker.py`), persisted to `desktop_settings.json` (`autoscope/desktop/settings.py`) and changeable anytime. `paths.py`'s `get_scripts_dir()`/`get_reports_dir()` are the single source of truth, so overrides apply everywhere automatically.
 
 ## Diagnostics & debugging
 
@@ -112,3 +113,5 @@ One-off Playwright probes live at the repo root for quick debugging:
 - iOS tests require a WebDriverAgent instance already running at `config.yaml:ios.wda_url` (default `http://localhost:8100`); `IOSDriver` connects to it but does not build/launch WDA. Run `./tools/start_ios_wda.sh` once per Simulator boot. Real devices need `tidevice`. macOS + Xcode only.
 - Crawl auto-login runs **only on the first page** and uses fallback selectors from `config.yaml` under `web.login_selectors`.
 - Build scripts (`packaging/build_macos.sh`, `packaging/build_linux.sh`, `packaging/build_windows.ps1`) just call `flet build ...`; see `pyproject.toml [tool.flet]` for product/artifact names.
+- Do not use `ft.FilePicker` (Flet 0.85.3): "Unknown control: FilePicker" on macOS desktop even on a fresh dev client (upstream bug, flet-dev/flet#6422/#6040). `autoscope/desktop/folder_picker.py` shells out to native OS folder dialogs as separate processes instead (tkinter's `askdirectory()` also doesn't work here — it needs the main thread on macOS, which Flet's event loop already owns).
+- A leftover `build/macos/AutoScope.app` (or `build/windows`/`build/linux`) from a prior `flet build` takes priority over the downloaded dev client and can be missing controls added since — delete `build/<platform>/` first if something shows as "Unknown control" in dev mode.

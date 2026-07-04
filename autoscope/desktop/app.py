@@ -18,6 +18,7 @@ from autoscope.desktop.views.common import _snack
 from autoscope.desktop.views.home import HomeViewMixin
 from autoscope.desktop.views.ios_manual import IOSManualViewMixin
 from autoscope.desktop.views.reports import ReportsViewMixin
+from autoscope.desktop.views.settings import SettingsViewMixin
 from autoscope.desktop.views.web_manual import WebManualViewMixin
 
 
@@ -28,6 +29,7 @@ class DesktopApp(
     IOSManualViewMixin,
     AutoRunViewMixin,
     ReportsViewMixin,
+    SettingsViewMixin,
 ):
     def __init__(self, page: ft.Page) -> None:
         self.page = page
@@ -146,6 +148,11 @@ class DesktopApp(
                     selected_icon=ft.Icons.ASSESSMENT,
                     label="Reports",
                 ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.SETTINGS_OUTLINED,
+                    selected_icon=ft.Icons.SETTINGS,
+                    label="Settings",
+                ),
             ],
             on_change=lambda e: self._navigate(e.control.selected_index),
         )
@@ -205,6 +212,8 @@ class DesktopApp(
                 self._show_auto_run()
             elif index == 5:
                 self._show_reports()
+            elif index == 6:
+                self._show_settings()
         except Exception as e:
             _snack(self.page, f"Navigation error: {e}", ft.Colors.ERROR)
         self.page.update()

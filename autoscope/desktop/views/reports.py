@@ -7,12 +7,13 @@ from pathlib import Path
 
 import flet as ft
 
+from autoscope.desktop.paths import get_reports_dir
 from autoscope.desktop.views.common import _section_title
 
 
 class ReportsViewMixin:
     def _show_reports(self) -> None:
-        report_dir = Path(self.config.runner.output_dir)
+        report_dir = get_reports_dir()
         reports = []
         if report_dir.exists():
             reports = sorted(report_dir.glob("*.html"), reverse=True)

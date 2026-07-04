@@ -4,10 +4,10 @@ This is exactly the class of check that would have caught the original bug
 report ("Android screen doesn't show"): Flet API drift such as
 ft.Colors.SUCCESS not existing, ft.Image.src_base64 not existing, or
 TapEvent.local_x not existing all raise plain AttributeError/TypeError the
-instant the view function runs, across all six desktop views (Home, Web
-Manual, Android Manual, iOS Manual, Auto Run, Reports) — no display, browser,
-Android device, or WebDriverAgent required to catch them. Runs on every
-`autoscope run`, unlike a manual click through the GUI.
+instant the view function runs, across all seven desktop views (Home, Web
+Manual, Android Manual, iOS Manual, Auto Run, Reports, Settings) — no display,
+browser, Android device, or WebDriverAgent required to catch them. Runs on
+every `autoscope run`, unlike a manual click through the GUI.
 """
 
 import unittest
@@ -19,6 +19,7 @@ from autoscope.desktop.views.auto_run import AutoRunViewMixin
 from autoscope.desktop.views.home import HomeViewMixin
 from autoscope.desktop.views.ios_manual import IOSManualViewMixin
 from autoscope.desktop.views.reports import ReportsViewMixin
+from autoscope.desktop.views.settings import SettingsViewMixin
 from autoscope.desktop.views.web_manual import WebManualViewMixin
 
 
@@ -55,6 +56,7 @@ class _FakeApp(
     IOSManualViewMixin,
     AutoRunViewMixin,
     ReportsViewMixin,
+    SettingsViewMixin,
 ):
     def __init__(self) -> None:
         self.page = _FakePage()
@@ -93,6 +95,10 @@ class TestDesktopViewsBuildHeadlessly(unittest.TestCase):
 
     def test_reports_view_builds(self) -> None:
         self.app._show_reports()
+        self.assertIsNotNone(self.app.content_area.content)
+
+    def test_settings_view_builds(self) -> None:
+        self.app._show_settings()
         self.assertIsNotNone(self.app.content_area.content)
 
 
