@@ -1,5 +1,6 @@
 """Runtime environment setup helpers for the packaged desktop app."""
 
+import os
 import shutil
 import subprocess
 import sys
@@ -9,7 +10,21 @@ from playwright.sync_api import sync_playwright
 
 
 def _executable(name: str):
-    return shutil.which(name)
+    path = shutil.which(name)
+    if path:
+        return path
+    # macOS GUI apps often don't inherit shell PATH; search common locations
+    home = os.path.expanduser("~")
+    candidates = [
+        f"/opt/homebrew/bin/{name}",
+        f"/usr/local/bin/{name}",
+        f"{home}/Library/Android/sdk/platform-tools/{name}",
+        f"{home}/Android/Sdk/platform-tools/{name}",
+    ]
+    for candidate in candidates:
+        if Path(candidate).exists():
+            return candidate
+    return None
 
 
 def check_adb():

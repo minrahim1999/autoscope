@@ -15,6 +15,9 @@ class TestExampleMobile(AutomateTestCase):
         self.mobile_screenshot("device_connected.png")
 
     def test_home_screen_exists(self) -> None:
-        # Simple uiautomator2 smoke check: device info is available
-        info = self.mobile.info
-        self.assertIn("screenOn", info)
+        # Avoid uiautomator2's DeviceInfo on API 37+ preview emulators,
+        # which can throw ApplicationSharedMemory errors. Use a screenshot
+        # and a shell-based screen-on check instead.
+        output = self.mobile.shell("dumpsys power | grep 'mWakefulness='")
+        self.assertIn("Awake", str(output))
+        self.mobile_screenshot("home_screen.png")

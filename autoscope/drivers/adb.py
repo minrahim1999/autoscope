@@ -1,5 +1,6 @@
 """Thin wrapper around the adb command-line tool."""
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,15 +11,40 @@ class ADBError(Exception):
     pass
 
 
+_COMMON_ADB_PATHS = [
+    "/opt/homebrew/bin/adb",
+    "/usr/local/bin/adb",
+    os.path.expanduser("~/Library/Android/sdk/platform-tools/adb"),
+    os.path.expanduser("~/Android/Sdk/platform-tools/adb"),
+]
+
+
+def _find_adb() -> Optional[str]:
+    path = shutil.which("adb")
+    if path:
+        return path
+    home = os.path.expanduser("~")
+    for candidate in _COMMON_ADB_PATHS:
+        if Path(candidate).exists():
+            return candidate
+    # Try to find any adb under a few SDK roots
+    for sdk_root in [f"{home}/Library/Android/sdk", f"{home}/Android/Sdk"]:
+        adb = Path(sdk_root) / "platform-tools" / "adb"
+        if adb.exists():
+            return str(adb)
+    return None
+
+
 class ADB:
     def __init__(self, serial: Optional[str] = None) -> None:
-        self._adb = shutil.which("adb")
-        if not self._adb:
+        adb = _find_adb()
+        if not adb:
             raise ADBError("adb not found in PATH. Install Android platform-tools.")
+        self._adb: str = adb
         self.serial = serial
 
     def _args(self, cmd: List[str]) -> List[str]:
-        args = [self._adb]
+        args: List[str] = [self._adb]
         if self.serial:
             args.extend(["-s", self.serial])
         args.extend(cmd)
