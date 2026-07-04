@@ -1,9 +1,10 @@
-"""Base test case that optionally provisions web/mobile drivers."""
+"""Base test case that optionally provisions web/mobile/iOS drivers."""
 
 import unittest
 from pathlib import Path
 
 from autoscope.config.loader import Config, load_config
+from autoscope.drivers.ios import IOSDriver
 from autoscope.drivers.mobile import MobileDriver
 from autoscope.drivers.web import WebDriver
 
@@ -13,9 +14,10 @@ class AutomateTestCase(unittest.TestCase):
     Inherit from this class to get managed web and/or mobile drivers.
 
     Class attributes:
-        tags: tuple of strings, e.g. ("web",) or ("mobile",) or ("web", "mobile")
+        tags: tuple of strings, e.g. ("web",) or ("mobile",) or ("web", "mobile", "ios")
         needs_web: bool
         needs_mobile: bool
+        needs_ios: bool
     """
 
     tags = ()
@@ -25,6 +27,7 @@ class AutomateTestCase(unittest.TestCase):
         cls.config: Config = load_config()
         cls._web_driver: WebDriver | None = None
         cls._mobile_driver: MobileDriver | None = None
+        cls._ios_driver: IOSDriver | None = None
 
         if getattr(cls, "needs_web", False) or "web" in cls.tags:
             cls._web_driver = WebDriver(cls.config.web)
@@ -34,6 +37,10 @@ class AutomateTestCase(unittest.TestCase):
             cls._mobile_driver = MobileDriver(cls.config.mobile)
             cls.mobile = cls._mobile_driver.start()
 
+        if getattr(cls, "needs_ios", False) or "ios" in cls.tags:
+            cls._ios_driver = IOSDriver(cls.config.ios)
+            cls.ios = cls._ios_driver.start()
+
     @classmethod
     def tearDownClass(cls) -> None:
         if cls._web_driver:
@@ -42,6 +49,9 @@ class AutomateTestCase(unittest.TestCase):
         if cls._mobile_driver:
             cls._mobile_driver.stop()
             cls._mobile_driver = None
+        if cls._ios_driver:
+            cls._ios_driver.stop()
+            cls._ios_driver = None
 
     def run(self, result=None):
         """Hook to capture screenshots on failure."""
@@ -62,6 +72,11 @@ class AutomateTestCase(unittest.TestCase):
                 self._mobile_driver.screenshot(f"mobile_{test_name}.png")
             except Exception:
                 pass
+        if self._ios_driver and self.config.ios.screenshot_on_failure:
+            try:
+                self._ios_driver.screenshot(f"ios_{test_name}.png")
+            except Exception:
+                pass
 
     def web_screenshot(self, name: str) -> Path:
         """Take a web screenshot inside a test."""
@@ -74,3 +89,9 @@ class AutomateTestCase(unittest.TestCase):
         if not self._mobile_driver:
             raise RuntimeError("Mobile driver not enabled for this test.")
         return self._mobile_driver.screenshot(name)
+
+    def ios_screenshot(self, name: str) -> Path:
+        """Take an iOS screenshot inside a test."""
+        if not self._ios_driver:
+            raise RuntimeError("iOS driver not enabled for this test.")
+        return self._ios_driver.screenshot(name)

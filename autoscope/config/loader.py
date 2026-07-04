@@ -34,6 +34,19 @@ class MobileConfig:
 
 
 @dataclass
+class IOSConfig:
+    # IOSDriver connects to an already-running WebDriverAgent instance; it
+    # does not build/launch WDA itself (that's a multi-minute Xcode build
+    # requiring the WebDriverAgent project, which this repo does not vendor).
+    # See tools/start_ios_wda.sh to start one against a booted Simulator.
+    wda_url: str = "http://localhost:8100"
+    bundle_id: Optional[str] = None
+    screenshot_on_failure: bool = True
+    screenshot_dir: str = "var/reports/screenshots"
+    video_dir: str = "var/reports/videos"
+
+
+@dataclass
 class RunnerConfig:
     output_dir: str = "var/reports"
     json_report: str = "var/reports/results.json"
@@ -46,6 +59,7 @@ class RunnerConfig:
 class Config:
     web: WebConfig = field(default_factory=WebConfig)
     mobile: MobileConfig = field(default_factory=MobileConfig)
+    ios: IOSConfig = field(default_factory=IOSConfig)
     runner: RunnerConfig = field(default_factory=RunnerConfig)
 
 
@@ -81,13 +95,16 @@ def load_config(path: str = "config.yaml") -> Config:
 
     web_data = data.get("web", {})
     mobile_data = data.get("mobile", {})
+    ios_data = data.get("ios", {})
     runner_data = data.get("runner", {})
     _env_override("AT_WEB", web_data, WebConfig)
     _env_override("AT_MOBILE", mobile_data, MobileConfig)
+    _env_override("AT_IOS", ios_data, IOSConfig)
     _env_override("AT_RUNNER", runner_data, RunnerConfig)
 
     return Config(
         web=WebConfig(**web_data),
         mobile=MobileConfig(**mobile_data),
+        ios=IOSConfig(**ios_data),
         runner=RunnerConfig(**runner_data),
     )

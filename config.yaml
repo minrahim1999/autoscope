@@ -9,6 +9,7 @@ web:
     height: 720
   screenshot_on_failure: true
   screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
   login_selectors:
     username: ["input[type='email']", "input[name='email']", "input[name='username']", "#username"]
     password: ["input[type='password']", "input[name='password']", "#password"]
@@ -23,6 +24,14 @@ mobile:
   uninstall_before: false
   screenshot_on_failure: true
   screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
+
+ios:
+  wda_url: http://localhost:8100  # WebDriverAgent must already be running; see tools/start_ios_wda.sh
+  bundle_id: null                 # e.g. com.example.app; null attaches to whatever's in the foreground
+  screenshot_on_failure: true
+  screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
 
 runner:
   output_dir: var/reports

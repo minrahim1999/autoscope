@@ -1,13 +1,14 @@
 [project]
 name = "autoscope"
 version = "1.0.0"
-description = "Web and Android test recorder, runner, and crawler"
+description = "Web, Android, and iOS test recorder, runner, and crawler"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "flet>=0.85.0",
     "playwright>=1.40.0",
     "uiautomator2>=2.16.0",
+    "facebook-wda>=1.5.0",
     "PyYAML>=6.0",
     "Pillow>=10.0.0",
 ]

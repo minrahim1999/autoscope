@@ -1,4 +1,4 @@
-"""AutoScope — minimal web + Android test harness."""
+"""AutoScope — minimal web, Android, and iOS test harness."""
 
 from .core.case import AutomateTestCase
 from .core.runner import run_tests

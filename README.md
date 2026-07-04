@@ -1,6 +1,6 @@
 # AutoScope
 
-A minimal, batteries-included test harness for **web** (via Playwright) and **Android mobile** (via ADB + uiautomator2) — now with a **desktop app** for recording and replaying tests, packaged for **macOS (.dmg), Windows (.exe), and Linux**.
+A minimal, batteries-included test harness for **web** (via Playwright), **Android mobile** (via ADB + uiautomator2), and **iOS** (via WebDriverAgent) — now with a **desktop app** for recording and replaying web/mobile tests, packaged for **macOS (.dmg), Windows (.exe), and Linux**.
 
 ## Features
 
@@ -9,8 +9,9 @@ A minimal, batteries-included test harness for **web** (via Playwright) and **An
 - **Auto test execution** of generated scripts for both web and mobile.
 - Web testing with Chromium/Firefox/WebKit through Playwright.
 - Android testing through real ADB-connected devices using `uiautomator2`.
-- Screenshot-on-failure for both web and mobile.
-- Tag-based filtering (`web`, `mobile`).
+- iOS testing (Simulator or real device) through WebDriverAgent using `wda` — CLI/`AutomateTestCase` only for now, no desktop recorder UI, macOS only.
+- Screenshot-on-failure for web, mobile, and iOS.
+- Tag-based filtering (`web`, `mobile`, `ios`).
 - JSON + HTML reports.
 - Pure stdlib `unittest` — no heavy test framework to learn.
 
@@ -27,6 +28,12 @@ Make sure `adb` is on your PATH and your Android device is connected:
 
 ```bash
 adb devices
+```
+
+For iOS, start WebDriverAgent against a booted Simulator (macOS + Xcode required; one-time per Simulator boot — the first run clones and builds WebDriverAgent, which takes a few minutes):
+
+```bash
+./tools/start_ios_wda.sh
 ```
 
 ## Desktop App
@@ -100,6 +107,7 @@ Output: `build/linux/`
 - The first launch copies `config.yaml` into the app data directory so it can be edited later.
 - Playwright Chromium browsers are not bundled; on first launch the app prompts to install them, or you can run `playwright install chromium` separately.
 - `adb` is not bundled; it must be available on the user's PATH for mobile testing.
+- iOS is not part of the desktop app at all yet (CLI/`AutomateTestCase` only).
 
 ## CLI Quick Start
 
@@ -119,6 +127,12 @@ Run only mobile tests:
 
 ```bash
 python -m autoscope.cli run --tag mobile
+```
+
+Run only iOS tests (start WebDriverAgent first — see Install):
+
+```bash
+python -m autoscope.cli run --tag ios
 ```
 
 ## No-Script Crawl Mode
@@ -151,6 +165,8 @@ Edit `config.yaml` or override with environment variables:
 - `AT_WEB_BROWSER=firefox`
 - `AT_MOBILE_DEVICE_SERIAL=<serial>`
 - `AT_MOBILE_APP_PACKAGE=com.example.app`
+- `AT_IOS_WDA_URL=http://localhost:8100`
+- `AT_IOS_BUNDLE_ID=com.example.app`
 
 ## Writing Tests
 
@@ -158,7 +174,7 @@ Edit `config.yaml` or override with environment variables:
 from autoscope import AutomateTestCase
 
 class TestMyApp(AutomateTestCase):
-    tags = ("web",)          # or ("mobile",) or both
+    tags = ("web",)          # or ("mobile",), ("ios",), or any combination
 
     def test_login(self):
         self.web.goto("https://example.com/login")
@@ -177,15 +193,26 @@ class TestAndroid(AutomateTestCase):
         self.mobile.device(text="OK").click()
 ```
 
+For iOS tests, `self.ios` is a `wda.Client` session (requires WebDriverAgent already running — see Install):
+
+```python
+class TestIOS(AutomateTestCase):
+    tags = ("ios",)
+
+    def test_button(self):
+        self.ios(name="OK").click()
+```
+
 ## Project Layout
 
 ```
 autoscope/
   config/       config loader
-  drivers/      web, mobile, adb wrappers
+  drivers/      web, mobile, ios, adb wrappers
   core/         test base class + runner
   reporting/    JSON + HTML reporters
   cli.py        command-line entry point
 tests_web/      web test packages
 tests_mobile/   mobile test packages
+tests_ios/      iOS test packages (requires a running WebDriverAgent)
 ```

@@ -29,7 +29,7 @@ def main(argv=None) -> int:
         "-t",
         action="append",
         default=[],
-        help="Filter tests by tag (web, mobile). Can be repeated.",
+        help="Filter tests by tag (web, mobile, ios). Can be repeated.",
     )
     run_parser.add_argument(
         "--pattern",

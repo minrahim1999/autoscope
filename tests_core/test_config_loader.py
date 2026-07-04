@@ -25,6 +25,10 @@ class TestDefaults(unittest.TestCase):
         self.assertEqual(config.mobile.screenshot_dir, "var/reports/screenshots")
         self.assertEqual(config.web.video_dir, "var/reports/videos")
         self.assertEqual(config.mobile.video_dir, "var/reports/videos")
+        self.assertEqual(config.ios.screenshot_dir, "var/reports/screenshots")
+        self.assertEqual(config.ios.video_dir, "var/reports/videos")
+        self.assertEqual(config.ios.wda_url, "http://localhost:8100")
+        self.assertIsNone(config.ios.bundle_id)
         self.assertEqual(config.runner.output_dir, "var/reports")
         self.assertEqual(config.runner.json_report, "var/reports/results.json")
         self.assertEqual(config.runner.html_report, "var/reports/report.html")
@@ -86,6 +90,11 @@ class TestEnvOverrides(unittest.TestCase):
         yaml_text = "mobile:\n  device_serial: null\n"
         config = self._load_with_env({"AT_MOBILE_DEVICE_SERIAL": "emulator-5554"}, yaml_text)
         self.assertEqual(config.mobile.device_serial, "emulator-5554")
+
+    def test_ios_wda_url_env_override(self) -> None:
+        yaml_text = "ios:\n  bundle_id: null\n"
+        config = self._load_with_env({"AT_IOS_WDA_URL": "http://localhost:9100"}, yaml_text)
+        self.assertEqual(config.ios.wda_url, "http://localhost:9100")
 
     def test_env_override_applies_even_when_key_absent_from_yaml(self) -> None:
         """Regression: _env_override used to only iterate keys already present
