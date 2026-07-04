@@ -1,6 +1,9 @@
 """Mobile Manual recorder view for the desktop app."""
 
 import threading
+import time
+from pathlib import Path
+from typing import Optional
 
 import flet as ft
 
@@ -19,6 +22,7 @@ class MobileManualViewMixin:
             width=240,
             prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE,
         )
+        video_checkbox = ft.Checkbox(label="Record video", value=False)
         status_text = ft.Text("Ready", color=ft.Colors.ON_SURFACE_VARIANT)
         screen_image = ft.Image(
             src=_BLANK_IMAGE,
@@ -37,6 +41,18 @@ class MobileManualViewMixin:
         action_list = ft.ListView(expand=True, spacing=4, auto_scroll=True)
         container_width = 360
         container_height = 640
+        last_script_path: dict = {"path": None}
+
+        run_button = ft.ElevatedButton(
+            "Run Test",
+            icon=ft.Icons.PLAY_ARROW,
+            disabled=True,
+        )
+        screenshot_button = ft.IconButton(
+            icon=ft.Icons.CAMERA_ALT,
+            tooltip="Take screenshot",
+            disabled=True,
+        )
 
         def add_action_log(action: RecordedAction) -> None:
             def update() -> None:
@@ -83,10 +99,13 @@ class MobileManualViewMixin:
                 self._mobile_recorder.set_status_callback(on_status)
                 status_text.value = "Connecting to device..."
                 status_text.update()
+                run_button.disabled = True
+                run_button.update()
+                last_script_path["path"] = None
 
                 def launch() -> None:
                     try:
-                        self._mobile_recorder.start(name_field.value)
+                        self._mobile_recorder.start(name_field.value, record_video=video_checkbox.value)
                         _ui_call(
                             self.page,
                             lambda: _snack(
@@ -99,6 +118,8 @@ class MobileManualViewMixin:
                             lambda: (
                                 setattr(status_text, "value", "Streaming..."),
                                 status_text.update(),
+                                setattr(screenshot_button, "disabled", False),
+                                screenshot_button.update(),
                             ),
                         )
                     except Exception as e:
@@ -121,11 +142,17 @@ class MobileManualViewMixin:
                 return
             status_text.value = "Saving script..."
             status_text.update()
+            screenshot_button.disabled = True
+            screenshot_button.update()
 
             def stop() -> None:
                 try:
                     path = self._mobile_recorder.stop()
+                    video_path = self._mobile_recorder.video_path
+                    last_script_path["path"] = path
                     msg = f"Script saved to {path}" if path else "No script saved"
+                    if video_path:
+                        msg += f"  |  video saved to {video_path}"
                     _ui_call(
                         self.page,
                         lambda: (
@@ -134,6 +161,8 @@ class MobileManualViewMixin:
                             status_text.update(),
                             setattr(screen_image, "src", _BLANK_IMAGE),
                             screen_image.update(),
+                            setattr(run_button, "disabled", path is None),
+                            run_button.update(),
                         ),
                     )
                 except Exception as e:
@@ -143,6 +172,60 @@ class MobileManualViewMixin:
                     )
 
             threading.Thread(target=stop, daemon=True).start()
+
+        def take_screenshot(_: ft.ControlEvent) -> None:
+            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+                _snack(self.page, "Start stream first")
+                return
+            name = f"manual_{int(time.time())}.png"
+            self._mobile_recorder.take_screenshot(name)
+            _snack(self.page, f"Screenshot saved: {name}")
+
+        def run_test(_: ft.ControlEvent) -> None:
+            path: Optional[Path] = last_script_path["path"]
+            if not path:
+                _snack(self.page, "Record and save a script first", ft.Colors.ERROR)
+                return
+            run_button.disabled = True
+            run_button.update()
+            status_text.value = f"Running {path.name}..."
+            status_text.update()
+
+            def run() -> None:
+                try:
+                    # Reuses the same ScriptRunner instance the Auto Run tab
+                    # drives, so a just-recorded script can be replayed
+                    # immediately without leaving this view.
+                    result = self._script_runner.run_and_report(path)
+                    status = result.get("status", "unknown")
+                    duration = result.get("duration_seconds", 0)
+                    msg = f"Run {status} in {duration:.2f}s"
+                    _ui_call(
+                        self.page,
+                        lambda: (
+                            _snack(self.page, msg, ft.Colors.GREEN if status == "passed" else ft.Colors.ERROR),
+                            setattr(status_text, "value", "Ready"),
+                            status_text.update(),
+                            setattr(run_button, "disabled", False),
+                            run_button.update(),
+                        ),
+                    )
+                except Exception as e:
+                    _ui_call(
+                        self.page,
+                        lambda err=str(e): (
+                            _snack(self.page, f"Run error: {err}", ft.Colors.ERROR),
+                            setattr(status_text, "value", "Ready"),
+                            status_text.update(),
+                            setattr(run_button, "disabled", False),
+                            run_button.update(),
+                        ),
+                    )
+
+            threading.Thread(target=run, daemon=True).start()
+
+        run_button.on_click = run_test
+        screenshot_button.on_click = take_screenshot
 
         def send_text(_: ft.ControlEvent) -> None:
             if not self._mobile_recorder or not self._mobile_recorder.is_recording:
@@ -217,7 +300,8 @@ class MobileManualViewMixin:
                     spacing=12,
                     run_spacing=12,
                     controls=[
-                        ft.Container(content=name_field, col={"xs": 12, "sm": 12, "md": 6, "lg": 6}),
+                        ft.Container(content=name_field, col={"xs": 12, "sm": 12, "md": 4, "lg": 3}),
+                        ft.Container(content=video_checkbox, col={"xs": 12, "sm": 6, "md": 2, "lg": 2}),
                         ft.Container(
                             content=ft.ElevatedButton(
                                 "Connect & Stream",
@@ -226,7 +310,7 @@ class MobileManualViewMixin:
                                 bgcolor=ft.Colors.ERROR_CONTAINER,
                                 color=ft.Colors.ON_ERROR_CONTAINER,
                             ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 3},
+                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
                         ),
                         ft.Container(
                             content=ft.ElevatedButton(
@@ -234,8 +318,10 @@ class MobileManualViewMixin:
                                 icon=ft.Icons.STOP,
                                 on_click=stop_stream,
                             ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 3},
+                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
                         ),
+                        ft.Container(content=screenshot_button, col={"xs": 6, "sm": 3, "md": 1, "lg": 1}),
+                        ft.Container(content=run_button, col={"xs": 12, "sm": 6, "md": 3, "lg": 2}),
                     ],
                 ),
                 status_text,

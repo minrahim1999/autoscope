@@ -34,6 +34,9 @@ class MobileRecorder:
         self._lock = threading.Lock()
         self._screen_size: Tuple[int, int] = (0, 0)
         self._display_scale: float = 1.0
+        self._video_process = None
+        self._video_remote_path: Optional[str] = None
+        self.video_path: Optional[Path] = None
 
     def set_callbacks(
         self,
@@ -47,12 +50,13 @@ class MobileRecorder:
         """Optional hook invoked when the stream health changes (e.g. device drops off)."""
         self._status_callback = callback
 
-    def start(self, name: str = "mobile_recording") -> None:
+    def start(self, name: str = "mobile_recording", record_video: bool = False) -> None:
         """Connect to the first available Android device and start streaming."""
         self._actions = []
         self._builder = ScriptBuilder(platform="mobile", name=name)
         self._recording = True
         self._streaming = True
+        self.video_path = None
 
         self._adb = ADB()
         serial = self.config.mobile.device_serial or self._adb.first_device()
@@ -72,6 +76,13 @@ class MobileRecorder:
                     break
         except Exception:
             self._screen_size = (1080, 1920)
+
+        if record_video:
+            try:
+                self._video_remote_path = "/sdcard/autoscope_record.mp4"
+                self._video_process = self._driver.adb.start_screenrecord(self._video_remote_path)
+            except Exception:
+                self._video_process = None
 
         self._stream_thread = threading.Thread(target=self._stream_loop, daemon=True)
         self._stream_thread.start()
@@ -189,6 +200,17 @@ class MobileRecorder:
         self._streaming = False
         if self._stream_thread and self._stream_thread.is_alive():
             self._stream_thread.join(timeout=2)
+        if self._video_process and self._driver:
+            try:
+                video_dir = Path(self.config.mobile.video_dir)
+                name = self._builder.name if self._builder else "recording"
+                dest = video_dir / f"{name}_mobile.mp4"
+                self.video_path = self._driver.adb.stop_screenrecord(
+                    self._video_process, self._video_remote_path, dest
+                )
+            except Exception:
+                self.video_path = None
+            self._video_process = None
         if self._driver:
             try:
                 self._driver.stop()

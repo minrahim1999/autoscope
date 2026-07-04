@@ -89,6 +89,35 @@ class ADB:
         self.run(["shell", "rm", remote], check=False)
         return dest
 
+    def start_screenrecord(self, remote_path: str = "/sdcard/autoscope_record.mp4") -> subprocess.Popen:
+        """Start `adb shell screenrecord` in the background.
+
+        The process blocks on-device until stopped (or a ~3min OS limit is
+        hit); call stop_screenrecord() to finalize and pull the result.
+        """
+        args = self._args(["shell", "screenrecord", remote_path])
+        return subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def stop_screenrecord(
+        self, process: subprocess.Popen, remote_path: str, dest: Path, timeout: float = 5.0
+    ) -> Path:
+        """Gracefully stop a screenrecord process and pull the resulting video.
+
+        screenrecord finalizes the mp4 container on SIGINT; killing the local
+        `adb shell` process alone does not do this and can leave an
+        unplayable file, so the signal is sent on-device via pkill.
+        """
+        self.run(["shell", "pkill", "-INT", "screenrecord"], check=False)
+        try:
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+        dest = Path(dest)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        self.run(["pull", remote_path, str(dest)])
+        self.run(["shell", "rm", remote_path], check=False)
+        return dest
+
     def install(self, apk_path: str) -> None:
         path = Path(apk_path)
         if not path.exists():

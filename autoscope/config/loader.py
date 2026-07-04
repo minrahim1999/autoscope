@@ -16,6 +16,7 @@ class WebConfig:
     viewport: dict = field(default_factory=lambda: {"width": 1280, "height": 720})
     screenshot_on_failure: bool = True
     screenshot_dir: str = "var/reports/screenshots"
+    video_dir: str = "var/reports/videos"
     login_selectors: dict = field(default_factory=dict)
 
 
@@ -29,6 +30,7 @@ class MobileConfig:
     uninstall_before: bool = False
     screenshot_on_failure: bool = True
     screenshot_dir: str = "var/reports/screenshots"
+    video_dir: str = "var/reports/videos"
 
 
 @dataclass

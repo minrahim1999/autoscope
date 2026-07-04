@@ -82,5 +82,52 @@ class TestShellAndSerialArgs(unittest.TestCase):
         self.assertEqual(adb._args(["shell", "echo", "hi"])[:2], ["/usr/bin/adb", "shell"])
 
 
+class TestScreenrecord(unittest.TestCase):
+    """screenrecord must be stopped with a graceful on-device SIGINT (not just
+    killing the local `adb shell` process) so the mp4 container is finalized
+    and playable; see stop_screenrecord()'s docstring for why."""
+
+    def setUp(self) -> None:
+        with mock.patch("autoscope.drivers.adb._find_adb", return_value="/usr/bin/adb"):
+            self.adb = ADB(serial="emulator-5554")
+
+    def test_start_screenrecord_launches_background_popen(self) -> None:
+        with mock.patch("autoscope.drivers.adb.subprocess.Popen") as popen:
+            self.adb.start_screenrecord("/sdcard/rec.mp4")
+            args = popen.call_args[0][0]
+        self.assertEqual(
+            args,
+            ["/usr/bin/adb", "-s", "emulator-5554", "shell", "screenrecord", "/sdcard/rec.mp4"],
+        )
+
+    def test_stop_screenrecord_sends_sigint_then_pulls_and_cleans_up(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        fake_process = mock.Mock()
+        with mock.patch.object(self.adb, "run") as run_mock:
+            with tempfile.TemporaryDirectory() as tmp:
+                dest = Path(tmp) / "out.mp4"
+                result = self.adb.stop_screenrecord(fake_process, "/sdcard/rec.mp4", dest)
+
+        fake_process.wait.assert_called_once()
+        calls = [c.args[0] for c in run_mock.call_args_list]
+        self.assertIn(["shell", "pkill", "-INT", "screenrecord"], calls)
+        self.assertIn(["pull", "/sdcard/rec.mp4", str(dest)], calls)
+        self.assertIn(["shell", "rm", "/sdcard/rec.mp4"], calls)
+        self.assertEqual(result, dest)
+
+    def test_stop_screenrecord_terminates_process_on_timeout(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        fake_process = mock.Mock()
+        fake_process.wait.side_effect = subprocess.TimeoutExpired(cmd="adb", timeout=5)
+        with mock.patch.object(self.adb, "run"):
+            with tempfile.TemporaryDirectory() as tmp:
+                self.adb.stop_screenrecord(fake_process, "/sdcard/rec.mp4", Path(tmp) / "out.mp4")
+        fake_process.terminate.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

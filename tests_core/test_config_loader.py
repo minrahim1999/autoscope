@@ -23,6 +23,8 @@ class TestDefaults(unittest.TestCase):
 
         self.assertEqual(config.web.screenshot_dir, "var/reports/screenshots")
         self.assertEqual(config.mobile.screenshot_dir, "var/reports/screenshots")
+        self.assertEqual(config.web.video_dir, "var/reports/videos")
+        self.assertEqual(config.mobile.video_dir, "var/reports/videos")
         self.assertEqual(config.runner.output_dir, "var/reports")
         self.assertEqual(config.runner.json_report, "var/reports/results.json")
         self.assertEqual(config.runner.html_report, "var/reports/report.html")
