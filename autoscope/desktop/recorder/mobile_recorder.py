@@ -27,6 +27,7 @@ class MobileRecorder:
         self._builder: Optional[ScriptBuilder] = None
         self._callback: Optional[Callable[[RecordedAction], None]] = None
         self._frame_callback: Optional[Callable[[str], None]] = None
+        self._status_callback: Optional[Callable[[str], None]] = None
         self._recording = False
         self._streaming = False
         self._stream_thread: Optional[threading.Thread] = None
@@ -41,6 +42,10 @@ class MobileRecorder:
     ) -> None:
         self._callback = action_callback
         self._frame_callback = frame_callback
+
+    def set_status_callback(self, callback: Callable[[str], None]) -> None:
+        """Optional hook invoked when the stream health changes (e.g. device drops off)."""
+        self._status_callback = callback
 
     def start(self, name: str = "mobile_recording") -> None:
         """Connect to the first available Android device and start streaming."""
@@ -73,6 +78,13 @@ class MobileRecorder:
 
     def _stream_loop(self) -> None:
         """Continuously capture and encode screenshots for the UI."""
+        consecutive_failures = 0
+        disconnected = False
+        # A device that stops responding (USB unplugged, screen off, adb drop)
+        # used to fail silently forever with a frozen preview. Surface it after
+        # a short grace period, and clear the warning once frames resume.
+        failure_threshold = 15  # ~3s at the 0.2s loop interval below
+
         while self._streaming:
             try:
                 if not self._device:
@@ -80,8 +92,7 @@ class MobileRecorder:
                     continue
                 img = self._device.screenshot()
                 if img is None:
-                    time.sleep(0.2)
-                    continue
+                    raise RuntimeError("empty screenshot from device")
                 # Downscale for streaming performance while preserving aspect ratio
                 img.thumbnail((480, 854))
                 buf = io.BytesIO()
@@ -89,8 +100,18 @@ class MobileRecorder:
                 b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
                 if self._frame_callback:
                     self._frame_callback(f"data:image/png;base64,{b64}")
+                if disconnected and self._status_callback:
+                    self._status_callback("Streaming...")
+                consecutive_failures = 0
+                disconnected = False
             except Exception:
-                pass
+                consecutive_failures += 1
+                if consecutive_failures == failure_threshold and not disconnected:
+                    disconnected = True
+                    if self._status_callback:
+                        self._status_callback(
+                            "Device not responding — check the USB/Wi-Fi connection"
+                        )
             time.sleep(0.2)
 
     def tap(self, display_x: int, display_y: int, display_width: int, display_height: int) -> None:

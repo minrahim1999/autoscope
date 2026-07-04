@@ -1,6 +1,6 @@
 import json
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Optional
 
@@ -63,24 +63,26 @@ def load_config(path: str = "config.yaml") -> Config:
         elif config_path.suffix == ".json":
             data = json.loads(text)
 
-    def _env_override(prefix: str, data_dict: dict) -> None:
-        for key in data_dict:
-            env_key = f"{prefix}_{key.upper()}"
+    def _env_override(prefix: str, data_dict: dict, schema: type) -> None:
+        # Iterate the dataclass schema, not data_dict's own keys, so an env var
+        # can set a value even when config.yaml omits that key entirely.
+        for f in fields(schema):
+            env_key = f"{prefix}_{f.name.upper()}"
             if env_key in os.environ:
                 raw = os.environ[env_key]
                 if raw.lower() in ("true", "false"):
-                    data_dict[key] = raw.lower() == "true"
+                    data_dict[f.name] = raw.lower() == "true"
                 elif raw.isdigit():
-                    data_dict[key] = int(raw)
+                    data_dict[f.name] = int(raw)
                 else:
-                    data_dict[key] = raw
+                    data_dict[f.name] = raw
 
     web_data = data.get("web", {})
     mobile_data = data.get("mobile", {})
     runner_data = data.get("runner", {})
-    _env_override("AT_WEB", web_data)
-    _env_override("AT_MOBILE", mobile_data)
-    _env_override("AT_RUNNER", runner_data)
+    _env_override("AT_WEB", web_data, WebConfig)
+    _env_override("AT_MOBILE", mobile_data, MobileConfig)
+    _env_override("AT_RUNNER", runner_data, RunnerConfig)
 
     return Config(
         web=WebConfig(**web_data),

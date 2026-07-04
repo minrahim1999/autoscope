@@ -63,6 +63,16 @@ class MobileManualViewMixin:
 
             _ui_call(self.page, update)
 
+        def on_status(message: str) -> None:
+            def update() -> None:
+                status_text.value = message
+                status_text.color = (
+                    ft.Colors.ERROR if "not responding" in message else ft.Colors.ON_SURFACE_VARIANT
+                )
+                status_text.update()
+
+            _ui_call(self.page, update)
+
         def start_stream(_: ft.ControlEvent) -> None:
             if self._mobile_recorder and self._mobile_recorder.is_recording:
                 _snack(self.page, "Already streaming")
@@ -70,6 +80,7 @@ class MobileManualViewMixin:
             try:
                 self._mobile_recorder = MobileRecorder(self.config)
                 self._mobile_recorder.set_callbacks(add_action_log, on_frame)
+                self._mobile_recorder.set_status_callback(on_status)
                 status_text.value = "Connecting to device..."
                 status_text.update()
 
@@ -153,6 +164,35 @@ class MobileManualViewMixin:
             self._mobile_recorder.tap(x, y, container_width, container_height)
             _snack(self.page, f"Tapped ({x}, {y})")
 
+        # Swipe support: on_tap_down gives us the true start position (it fires
+        # before the gesture arena decides tap vs. drag); on_pan_update deltas
+        # are accumulated onto it to get an end position for on_pan_end. A small
+        # distance deadzone keeps ordinary taps (handled by on_tap above) from
+        # also registering as a zero-length swipe.
+        swipe_origin = {"x": 0.0, "y": 0.0}
+        swipe_current = {"x": 0.0, "y": 0.0}
+        SWIPE_DEADZONE = 12
+
+        def on_tap_down(e: ft.TapEvent) -> None:
+            swipe_origin["x"] = swipe_current["x"] = e.local_position.x
+            swipe_origin["y"] = swipe_current["y"] = e.local_position.y
+
+        def on_pan_update(e: ft.DragUpdateEvent) -> None:
+            swipe_current["x"] += e.local_delta.x
+            swipe_current["y"] += e.local_delta.y
+
+        def on_pan_end(_: ft.DragEndEvent) -> None:
+            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+                return
+            dx = swipe_current["x"] - swipe_origin["x"]
+            dy = swipe_current["y"] - swipe_origin["y"]
+            if (dx * dx + dy * dy) ** 0.5 < SWIPE_DEADZONE:
+                return
+            x1, y1 = int(swipe_origin["x"]), int(swipe_origin["y"])
+            x2, y2 = int(swipe_current["x"]), int(swipe_current["y"])
+            self._mobile_recorder.swipe(x1, y1, x2, y2, container_width, container_height)
+            _snack(self.page, f"Swiped ({x1}, {y1}) -> ({x2}, {y2})")
+
         screen_with_gesture = ft.GestureDetector(
             content=ft.Container(
                 width=container_width,
@@ -162,6 +202,9 @@ class MobileManualViewMixin:
                 content=screen_image,
             ),
             on_tap_up=on_tap,
+            on_tap_down=on_tap_down,
+            on_pan_update=on_pan_update,
+            on_pan_end=on_pan_end,
         )
 
         self.content_area.content = ft.Column(

@@ -1,5 +1,6 @@
 """Generate a simple HTML report from JSON result data."""
 
+import html
 from string import Template
 from typing import Any, Dict
 
@@ -49,14 +50,15 @@ _HTML = Template("""<!doctype html>
 
 def _row(result: Dict[str, Any]) -> str:
     status = result["status"]
-    msg = result["message"] or ""
+    name = html.escape(str(result["name"]))
+    msg = html.escape(str(result["message"] or ""))
     detail = ""
     if result.get("traceback"):
-        detail = f"<pre>{result['traceback']}</pre>"
+        detail = f"<pre>{html.escape(str(result['traceback']))}</pre>"
     return (
         f"<tr>"
-        f"<td>{result['name']}</td>"
-        f'<td class="status {status}">{status}</td>'
+        f"<td>{name}</td>"
+        f'<td class="status {html.escape(status)}">{html.escape(status)}</td>'
         f'<td>{msg}{detail}</td>'
         f"</tr>"
     )
