@@ -46,7 +46,7 @@ class HomeViewMixin:
                     color=ft.Colors.PRIMARY,
                 ),
                 ft.Text(
-                    "Record manual interactions and replay them automatically for web, mobile, and iOS.",
+                    "Record manual interactions and replay them automatically for web, Android, and iOS.",
                     size=16,
                     text_align=ft.TextAlign.CENTER,
                 ),
@@ -69,7 +69,7 @@ class HomeViewMixin:
                             lambda _: self._navigate(1),
                         ),
                         card(
-                            "Mobile Manual",
+                            "Android Manual",
                             "Stream your Android device, tap and type, then generate a script.",
                             ft.Icons.SMARTPHONE,
                             lambda _: self._navigate(2),

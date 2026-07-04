@@ -1,12 +1,12 @@
-# platform: mobile
-# name: rerun_check
-# generated: 2026-07-04T13:11:15.076425
-from autoscope.drivers.mobile import MobileDriver
+# platform: android
+# name: android_check
+# generated: 2026-07-04T12:45:46.408679
+from autoscope.drivers.android import AndroidDriver
 from autoscope.config.loader import load_config
 
 def run():
     config = load_config()
-    driver = MobileDriver(config.mobile)
+    driver = AndroidDriver(config.android)
     device = driver.start()
     try:
         pass

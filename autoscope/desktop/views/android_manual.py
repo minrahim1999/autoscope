@@ -1,4 +1,4 @@
-"""Mobile Manual recorder view for the desktop app."""
+"""Android Manual recorder view for the desktop app."""
 
 import threading
 import time
@@ -7,18 +7,18 @@ from typing import Optional
 
 import flet as ft
 
-from autoscope.desktop.recorder.mobile_recorder import MobileRecorder
+from autoscope.desktop.recorder.android_recorder import AndroidRecorder
 from autoscope.desktop.recorder.script_builder import RecordedAction
 from autoscope.desktop.views.common import _snack, _section_title, _ui_call
 
 _BLANK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
 
 
-class MobileManualViewMixin:
-    def _show_mobile_manual(self) -> None:
+class AndroidManualViewMixin:
+    def _show_android_manual(self) -> None:
         name_field = ft.TextField(
             label="Script name",
-            value="mobile_recording",
+            value="android_recording",
             width=240,
             prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE,
         )
@@ -90,13 +90,13 @@ class MobileManualViewMixin:
             _ui_call(self.page, update)
 
         def start_stream(_: ft.ControlEvent) -> None:
-            if self._mobile_recorder and self._mobile_recorder.is_recording:
+            if self._android_recorder and self._android_recorder.is_recording:
                 _snack(self.page, "Already streaming")
                 return
             try:
-                self._mobile_recorder = MobileRecorder(self.config)
-                self._mobile_recorder.set_callbacks(add_action_log, on_frame)
-                self._mobile_recorder.set_status_callback(on_status)
+                self._android_recorder = AndroidRecorder(self.config)
+                self._android_recorder.set_callbacks(add_action_log, on_frame)
+                self._android_recorder.set_status_callback(on_status)
                 status_text.value = "Connecting to device..."
                 status_text.update()
                 run_button.disabled = True
@@ -105,12 +105,12 @@ class MobileManualViewMixin:
 
                 def launch() -> None:
                     try:
-                        self._mobile_recorder.start(name_field.value, record_video=video_checkbox.value)
+                        self._android_recorder.start(name_field.value, record_video=video_checkbox.value)
                         _ui_call(
                             self.page,
                             lambda: _snack(
                                 self.page,
-                                f"Connected to {self._mobile_recorder.serial}",
+                                f"Connected to {self._android_recorder.serial}",
                             ),
                         )
                         _ui_call(
@@ -137,7 +137,7 @@ class MobileManualViewMixin:
                 _snack(self.page, f"Error: {e}", ft.Colors.ERROR)
 
         def stop_stream(_: ft.ControlEvent) -> None:
-            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+            if not self._android_recorder or not self._android_recorder.is_recording:
                 _snack(self.page, "No active stream")
                 return
             status_text.value = "Saving script..."
@@ -147,8 +147,8 @@ class MobileManualViewMixin:
 
             def stop() -> None:
                 try:
-                    path = self._mobile_recorder.stop()
-                    video_path = self._mobile_recorder.video_path
+                    path = self._android_recorder.stop()
+                    video_path = self._android_recorder.video_path
                     last_script_path["path"] = path
                     msg = f"Script saved to {path}" if path else "No script saved"
                     if video_path:
@@ -174,11 +174,11 @@ class MobileManualViewMixin:
             threading.Thread(target=stop, daemon=True).start()
 
         def take_screenshot(_: ft.ControlEvent) -> None:
-            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+            if not self._android_recorder or not self._android_recorder.is_recording:
                 _snack(self.page, "Start stream first")
                 return
             name = f"manual_{int(time.time())}.png"
-            self._mobile_recorder.take_screenshot(name)
+            self._android_recorder.take_screenshot(name)
             _snack(self.page, f"Screenshot saved: {name}")
 
         def run_test(_: ft.ControlEvent) -> None:
@@ -228,23 +228,23 @@ class MobileManualViewMixin:
         screenshot_button.on_click = take_screenshot
 
         def send_text(_: ft.ControlEvent) -> None:
-            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+            if not self._android_recorder or not self._android_recorder.is_recording:
                 _snack(self.page, "Start stream first")
                 return
             text = input_field.value or ""
             if not text:
                 return
-            self._mobile_recorder.input_text(text)
+            self._android_recorder.input_text(text)
             _snack(self.page, f"Sent text: {text}")
             input_field.value = ""
             input_field.update()
 
         def on_tap(e: ft.TapEvent) -> None:
-            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+            if not self._android_recorder or not self._android_recorder.is_recording:
                 return
             x = int(e.local_position.x)
             y = int(e.local_position.y)
-            self._mobile_recorder.tap(x, y, container_width, container_height)
+            self._android_recorder.tap(x, y, container_width, container_height)
             _snack(self.page, f"Tapped ({x}, {y})")
 
         # Swipe support: on_tap_down gives us the true start position (it fires
@@ -265,7 +265,7 @@ class MobileManualViewMixin:
             swipe_current["y"] += e.local_delta.y
 
         def on_pan_end(_: ft.DragEndEvent) -> None:
-            if not self._mobile_recorder or not self._mobile_recorder.is_recording:
+            if not self._android_recorder or not self._android_recorder.is_recording:
                 return
             dx = swipe_current["x"] - swipe_origin["x"]
             dy = swipe_current["y"] - swipe_origin["y"]
@@ -273,7 +273,7 @@ class MobileManualViewMixin:
                 return
             x1, y1 = int(swipe_origin["x"]), int(swipe_origin["y"])
             x2, y2 = int(swipe_current["x"]), int(swipe_current["y"])
-            self._mobile_recorder.swipe(x1, y1, x2, y2, container_width, container_height)
+            self._android_recorder.swipe(x1, y1, x2, y2, container_width, container_height)
             _snack(self.page, f"Swiped ({x1}, {y1}) -> ({x2}, {y2})")
 
         screen_with_gesture = ft.GestureDetector(
@@ -295,7 +295,7 @@ class MobileManualViewMixin:
             spacing=16,
             scroll=ft.ScrollMode.AUTO,
             controls=[
-                _section_title("Mobile Manual Recorder", ft.Icons.SMARTPHONE),
+                _section_title("Android Manual Recorder", ft.Icons.SMARTPHONE),
                 # Row(wrap=True) reflows based on real measured width instead
                 # of ResponsiveRow's breakpoint guessing (see home.py).
                 ft.Row(

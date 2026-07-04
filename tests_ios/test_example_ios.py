@@ -14,7 +14,7 @@ class TestExampleIOS(AutomateTestCase):
     def test_device_is_connected(self) -> None:
         status = self.ios.status()
         self.assertTrue(status.get("ready"))
-        # Prefixed to avoid colliding with tests_mobile's identically-named
+        # Prefixed to avoid colliding with tests_android's identically-named
         # screenshot in the shared var/reports/screenshots/ directory.
         self.ios_screenshot("ios_device_connected.png")
 

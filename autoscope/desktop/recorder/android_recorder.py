@@ -1,4 +1,4 @@
-"""Record manual mobile interactions by streaming the device screen."""
+"""Record manual Android interactions by streaming the device screen."""
 
 import base64
 import io
@@ -12,15 +12,15 @@ from PIL import Image
 from autoscope.config.loader import Config, load_config
 from autoscope.desktop.recorder.script_builder import RecordedAction, ScriptBuilder
 from autoscope.drivers.adb import ADB
-from autoscope.drivers.mobile import MobileDriver
+from autoscope.drivers.android import AndroidDriver
 
 
-class MobileRecorder:
+class AndroidRecorder:
     """Stream an Android device screen to the desktop and record taps/inputs."""
 
     def __init__(self, config: Optional[Config] = None) -> None:
         self.config = config or load_config()
-        self._driver: Optional[MobileDriver] = None
+        self._driver: Optional[AndroidDriver] = None
         self._device = None
         self._adb: Optional[ADB] = None
         self._actions: List[RecordedAction] = []
@@ -50,19 +50,19 @@ class MobileRecorder:
         """Optional hook invoked when the stream health changes (e.g. device drops off)."""
         self._status_callback = callback
 
-    def start(self, name: str = "mobile_recording", record_video: bool = False) -> None:
+    def start(self, name: str = "android_recording", record_video: bool = False) -> None:
         """Connect to the first available Android device and start streaming."""
         self._actions = []
-        self._builder = ScriptBuilder(platform="mobile", name=name)
+        self._builder = ScriptBuilder(platform="android", name=name)
         self._recording = True
         self._streaming = True
         self.video_path = None
 
         self._adb = ADB()
-        serial = self.config.mobile.device_serial or self._adb.first_device()
-        self.config.mobile.device_serial = serial
+        serial = self.config.android.device_serial or self._adb.first_device()
+        self.config.android.device_serial = serial
 
-        self._driver = MobileDriver(self.config.mobile)
+        self._driver = AndroidDriver(self.config.android)
         self._device = self._driver.start()
 
         # Determine real screen size via adb for accurate coordinate mapping
@@ -179,7 +179,7 @@ class MobileRecorder:
         with self._lock:
             if not self._recording:
                 return
-            recorded = RecordedAction(action=action, platform="mobile", data=data)
+            recorded = RecordedAction(action=action, platform="android", data=data)
             self._actions.append(recorded)
             assert self._builder is not None
             self._builder.add(action, data)
@@ -202,9 +202,9 @@ class MobileRecorder:
             self._stream_thread.join(timeout=2)
         if self._video_process and self._driver:
             try:
-                video_dir = Path(self.config.mobile.video_dir)
+                video_dir = Path(self.config.android.video_dir)
                 name = self._builder.name if self._builder else "recording"
-                dest = video_dir / f"{name}_mobile.mp4"
+                dest = video_dir / f"{name}_android.mp4"
                 self.video_path = self._driver.adb.stop_screenrecord(
                     self._video_process, self._video_remote_path, dest
                 )
@@ -233,4 +233,4 @@ class MobileRecorder:
 
     @property
     def serial(self) -> str:
-        return self.config.mobile.device_serial or ""
+        return self.config.android.device_serial or ""

@@ -15,8 +15,7 @@ web:
     password: ["input[type='password']", "input[name='password']", "#password"]
     submit: ["button:has-text('Login')", "button:has-text('Log in')", "button:has-text('Sign in')", "button[type='submit']", "input[type='submit']"]
 
-mobile:
-  platform: android
+android:
   device_serial: null      # null = use first available adb device
   app_package: null        # e.g. com.example.app
   app_activity: null       # e.g. .MainActivity

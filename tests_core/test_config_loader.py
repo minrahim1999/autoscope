@@ -22,9 +22,9 @@ class TestDefaults(unittest.TestCase):
             config = load_config(missing_path)
 
         self.assertEqual(config.web.screenshot_dir, "var/reports/screenshots")
-        self.assertEqual(config.mobile.screenshot_dir, "var/reports/screenshots")
+        self.assertEqual(config.android.screenshot_dir, "var/reports/screenshots")
         self.assertEqual(config.web.video_dir, "var/reports/videos")
-        self.assertEqual(config.mobile.video_dir, "var/reports/videos")
+        self.assertEqual(config.android.video_dir, "var/reports/videos")
         self.assertEqual(config.ios.screenshot_dir, "var/reports/screenshots")
         self.assertEqual(config.ios.video_dir, "var/reports/videos")
         self.assertEqual(config.ios.wda_url, "http://localhost:8100")
@@ -46,7 +46,7 @@ web:
   browser: firefox
   headless: true
   base_url: https://staging.example.com
-mobile:
+android:
   device_serial: emulator-5554
 runner:
   verbosity: 1
@@ -59,7 +59,7 @@ runner:
         self.assertEqual(config.web.browser, "firefox")
         self.assertTrue(config.web.headless)
         self.assertEqual(config.web.base_url, "https://staging.example.com")
-        self.assertEqual(config.mobile.device_serial, "emulator-5554")
+        self.assertEqual(config.android.device_serial, "emulator-5554")
         self.assertEqual(config.runner.verbosity, 1)
 
 
@@ -87,9 +87,9 @@ class TestEnvOverrides(unittest.TestCase):
         self.assertIsInstance(config.runner.verbosity, int)
 
     def test_plain_string_stays_string(self) -> None:
-        yaml_text = "mobile:\n  device_serial: null\n"
-        config = self._load_with_env({"AT_MOBILE_DEVICE_SERIAL": "emulator-5554"}, yaml_text)
-        self.assertEqual(config.mobile.device_serial, "emulator-5554")
+        yaml_text = "android:\n  device_serial: null\n"
+        config = self._load_with_env({"AT_ANDROID_DEVICE_SERIAL": "emulator-5554"}, yaml_text)
+        self.assertEqual(config.android.device_serial, "emulator-5554")
 
     def test_ios_wda_url_env_override(self) -> None:
         yaml_text = "ios:\n  bundle_id: null\n"

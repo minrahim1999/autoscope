@@ -1,11 +1,11 @@
 """Headless smoke tests that build every desktop view without a live GUI.
 
 This is exactly the class of check that would have caught the original bug
-report ("mobile screen doesn't show"): Flet API drift such as
+report ("Android screen doesn't show"): Flet API drift such as
 ft.Colors.SUCCESS not existing, ft.Image.src_base64 not existing, or
 TapEvent.local_x not existing all raise plain AttributeError/TypeError the
 instant the view function runs, across all six desktop views (Home, Web
-Manual, Mobile Manual, iOS Manual, Auto Run, Reports) — no display, browser,
+Manual, Android Manual, iOS Manual, Auto Run, Reports) — no display, browser,
 Android device, or WebDriverAgent required to catch them. Runs on every
 `autoscope run`, unlike a manual click through the GUI.
 """
@@ -14,10 +14,10 @@ import unittest
 
 from autoscope.config.loader import load_config
 from autoscope.desktop.runner.script_runner import ScriptRunner
+from autoscope.desktop.views.android_manual import AndroidManualViewMixin
 from autoscope.desktop.views.auto_run import AutoRunViewMixin
 from autoscope.desktop.views.home import HomeViewMixin
 from autoscope.desktop.views.ios_manual import IOSManualViewMixin
-from autoscope.desktop.views.mobile_manual import MobileManualViewMixin
 from autoscope.desktop.views.reports import ReportsViewMixin
 from autoscope.desktop.views.web_manual import WebManualViewMixin
 
@@ -35,7 +35,7 @@ class _FakePage:
         # Real Flet requires `handler` to be an async coroutine function and
         # schedules it on the page's event loop; here we just verify the
         # contract callers must honor, since violating it is exactly what
-        # broke the mobile screen originally.
+        # broke the Android screen originally.
         import inspect
 
         if not inspect.iscoroutinefunction(handler):
@@ -51,7 +51,7 @@ class _FakeContentArea:
 class _FakeApp(
     HomeViewMixin,
     WebManualViewMixin,
-    MobileManualViewMixin,
+    AndroidManualViewMixin,
     IOSManualViewMixin,
     AutoRunViewMixin,
     ReportsViewMixin,
@@ -60,7 +60,7 @@ class _FakeApp(
         self.page = _FakePage()
         self.config = load_config("does-not-exist.yaml")
         self.content_area = _FakeContentArea()
-        self._mobile_recorder = None
+        self._android_recorder = None
         self._web_recorder = None
         self._ios_recorder = None
         self._script_runner = ScriptRunner(self.config)
@@ -79,8 +79,8 @@ class TestDesktopViewsBuildHeadlessly(unittest.TestCase):
         self.app._show_web_manual()
         self.assertIsNotNone(self.app.content_area.content)
 
-    def test_mobile_manual_view_builds(self) -> None:
-        self.app._show_mobile_manual()
+    def test_android_manual_view_builds(self) -> None:
+        self.app._show_android_manual()
         self.assertIsNotNone(self.app.content_area.content)
 
     def test_ios_manual_view_builds(self) -> None:

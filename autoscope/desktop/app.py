@@ -7,16 +7,16 @@ import flet as ft
 
 from autoscope.config.loader import load_config
 from autoscope.desktop.paths import get_app_dir, get_config_path, is_packaged
+from autoscope.desktop.recorder.android_recorder import AndroidRecorder
 from autoscope.desktop.recorder.ios_recorder import IOSRecorder
-from autoscope.desktop.recorder.mobile_recorder import MobileRecorder
 from autoscope.desktop.recorder.web_recorder import WebRecorder
 from autoscope.desktop.runner.script_runner import ScriptRunner
 from autoscope.desktop.setup import check_adb, check_playwright_browsers, install_playwright_browsers
+from autoscope.desktop.views.android_manual import AndroidManualViewMixin
 from autoscope.desktop.views.auto_run import AutoRunViewMixin
 from autoscope.desktop.views.common import _snack
 from autoscope.desktop.views.home import HomeViewMixin
 from autoscope.desktop.views.ios_manual import IOSManualViewMixin
-from autoscope.desktop.views.mobile_manual import MobileManualViewMixin
 from autoscope.desktop.views.reports import ReportsViewMixin
 from autoscope.desktop.views.web_manual import WebManualViewMixin
 
@@ -24,7 +24,7 @@ from autoscope.desktop.views.web_manual import WebManualViewMixin
 class DesktopApp(
     HomeViewMixin,
     WebManualViewMixin,
-    MobileManualViewMixin,
+    AndroidManualViewMixin,
     IOSManualViewMixin,
     AutoRunViewMixin,
     ReportsViewMixin,
@@ -39,7 +39,7 @@ class DesktopApp(
                 os.environ["AUTOMATE_TESTER_CONFIG"] = str(config_path)
         self.config = load_config()
         self._web_recorder: Optional[WebRecorder] = None
-        self._mobile_recorder: Optional[MobileRecorder] = None
+        self._android_recorder: Optional[AndroidRecorder] = None
         self._ios_recorder: Optional[IOSRecorder] = None
         self._script_runner = ScriptRunner(self.config)
         self._theme_button: Optional[ft.IconButton] = None
@@ -129,7 +129,7 @@ class DesktopApp(
                 ft.NavigationRailDestination(
                     icon=ft.Icons.SMARTPHONE_OUTLINED,
                     selected_icon=ft.Icons.SMARTPHONE,
-                    label="Mobile Manual",
+                    label="Android Manual",
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.Icons.PHONE_IPHONE_OUTLINED,
@@ -198,7 +198,7 @@ class DesktopApp(
             elif index == 1:
                 self._show_web_manual()
             elif index == 2:
-                self._show_mobile_manual()
+                self._show_android_manual()
             elif index == 3:
                 self._show_ios_manual()
             elif index == 4:

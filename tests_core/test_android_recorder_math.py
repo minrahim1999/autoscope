@@ -1,10 +1,11 @@
-"""Regression tests for MobileRecorder's display-to-device coordinate mapping.
+"""Regression tests for AndroidRecorder's display-to-device coordinate mapping.
 
 These exercise the pure math in isolation (no adb/device required) by
-constructing a MobileRecorder without calling start(), then manually priming
-the bits start() would normally set: _screen_size, _builder, and _recording.
-_driver stays None, so tap()/swipe()/input_text() record the action but skip
-the real `adb shell input ...` call (guarded by `if self._driver:`).
+constructing an AndroidRecorder without calling start(), then manually
+priming the bits start() would normally set: _screen_size, _builder, and
+_recording. _driver stays None, so tap()/swipe()/input_text() record the
+action but skip the real `adb shell input ...` call (guarded by
+`if self._driver:`).
 """
 
 import unittest
@@ -12,14 +13,14 @@ from pathlib import Path
 from unittest import mock
 
 from autoscope.config.loader import load_config
-from autoscope.desktop.recorder.mobile_recorder import MobileRecorder
+from autoscope.desktop.recorder.android_recorder import AndroidRecorder
 from autoscope.desktop.recorder.script_builder import ScriptBuilder
 
 
-def _make_recorder(screen_size=(1080, 1920)) -> MobileRecorder:
-    recorder = MobileRecorder(load_config("does-not-exist.yaml"))
+def _make_recorder(screen_size=(1080, 1920)) -> AndroidRecorder:
+    recorder = AndroidRecorder(load_config("does-not-exist.yaml"))
     recorder._screen_size = screen_size
-    recorder._builder = ScriptBuilder(platform="mobile", name="test")
+    recorder._builder = ScriptBuilder(platform="android", name="test")
     recorder._recording = True
     return recorder
 
@@ -75,7 +76,6 @@ class TestInputTextRecording(unittest.TestCase):
 
     def test_stop_saves_script_with_recorded_actions(self) -> None:
         import tempfile
-        from pathlib import Path
 
         recorder = _make_recorder()
         recorder.tap(180, 320, 360, 640)

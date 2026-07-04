@@ -10,10 +10,10 @@ from autoscope.desktop.recorder.script_builder import ScriptBuilder
 class TestScriptBuilderEmptyRecordings(unittest.TestCase):
     """A recording with zero captured actions used to generate a script with an
     empty `try:` block, which is a SyntaxError. This is exactly what happened
-    when mobile taps were silently dropped (see scripts/*_mobile.py history)."""
+    when Android taps were silently dropped (see scripts/*_android.py history)."""
 
-    def test_empty_mobile_script_compiles(self) -> None:
-        builder = ScriptBuilder(platform="mobile", name="empty")
+    def test_empty_android_script_compiles(self) -> None:
+        builder = ScriptBuilder(platform="android", name="empty")
         source = builder.build()
         self.assertIn("pass", source)
         compile(source, "<test>", "exec")
@@ -31,9 +31,9 @@ class TestScriptBuilderEmptyRecordings(unittest.TestCase):
         compile(source, "<test>", "exec")
 
 
-class TestScriptBuilderMobileActions(unittest.TestCase):
+class TestScriptBuilderAndroidActions(unittest.TestCase):
     def setUp(self) -> None:
-        self.builder = ScriptBuilder(platform="mobile", name="flow")
+        self.builder = ScriptBuilder(platform="android", name="flow")
 
     def test_records_tap_input_swipe_wait_screenshot(self) -> None:
         self.builder.add("tap", {"x": 100, "y": 200})
@@ -130,7 +130,7 @@ class TestScriptBuilderSave(unittest.TestCase):
     def test_repeated_saves_do_not_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)
-            builder = ScriptBuilder(platform="mobile", name="dup")
+            builder = ScriptBuilder(platform="android", name="dup")
             first = builder.save(directory)
             second = builder.save(directory)
             third = builder.save(directory)
@@ -140,8 +140,8 @@ class TestScriptBuilderSave(unittest.TestCase):
             self.assertTrue(first.exists())
             self.assertTrue(second.exists())
             self.assertTrue(third.exists())
-            self.assertEqual(second.name, "dup_mobile_001.py")
-            self.assertEqual(third.name, "dup_mobile_002.py")
+            self.assertEqual(second.name, "dup_android_001.py")
+            self.assertEqual(third.name, "dup_android_002.py")
 
 
 if __name__ == "__main__":

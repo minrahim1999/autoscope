@@ -1,6 +1,6 @@
 """Record manual iOS interactions by streaming the WebDriverAgent-connected screen.
 
-Mirrors MobileRecorder's shape closely, with two iOS-specific differences:
+Mirrors AndroidRecorder's shape closely, with two iOS-specific differences:
   - Screenshots are in device pixels, but wda's tap()/swipe() expect points
     (window_size()), so display coordinates are scaled into point space
     instead of raw pixels.

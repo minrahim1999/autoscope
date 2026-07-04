@@ -37,8 +37,8 @@ class ScriptRunner:
         name = script_path.name
         if "_web" in name:
             return "web"
-        if "_mobile" in name:
-            return "mobile"
+        if "_android" in name:
+            return "android"
         if "_ios" in name:
             return "ios"
         return "unknown"

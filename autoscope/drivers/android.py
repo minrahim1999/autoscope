@@ -5,12 +5,12 @@ from typing import Optional
 
 import uiautomator2 as u2
 
-from autoscope.config.loader import MobileConfig
+from autoscope.config.loader import AndroidConfig
 from autoscope.drivers.adb import ADB
 
 
-class MobileDriver:
-    def __init__(self, config: MobileConfig) -> None:
+class AndroidDriver:
+    def __init__(self, config: AndroidConfig) -> None:
         self.config = config
         self.adb = ADB(serial=config.device_serial)
         self._device: Optional[u2.Device] = None
@@ -40,7 +40,7 @@ class MobileDriver:
     @property
     def device(self) -> u2.Device:
         if self._device is None:
-            raise RuntimeError("Mobile driver not started. Call start() first.")
+            raise RuntimeError("Android driver not started. Call start() first.")
         return self._device
 
     def screenshot(self, name: str) -> Path:

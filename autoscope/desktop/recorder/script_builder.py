@@ -18,10 +18,10 @@ class RecordedAction:
 
 
 class ScriptBuilder:
-    """Build a runnable Python script from recorded web/mobile actions."""
+    """Build a runnable Python script from recorded web/Android/iOS actions."""
 
     def __init__(self, platform: str, name: str, base_url: Optional[str] = None) -> None:
-        self.platform = platform  # "web" or "mobile"
+        self.platform = platform  # "web", "android", or "ios"
         self.name = self._sanitize_name(name)
         self.base_url = base_url
         self.actions: List[RecordedAction] = []
@@ -99,17 +99,17 @@ class ScriptBuilder:
         )
         return "\n".join(lines)
 
-    def build_mobile_script(self) -> str:
+    def build_android_script(self) -> str:
         lines = [
-            f"# platform: mobile",
+            f"# platform: android",
             f"# name: {self.name}",
             f"# generated: {datetime.now().isoformat()}",
-            "from autoscope.drivers.mobile import MobileDriver",
+            "from autoscope.drivers.android import AndroidDriver",
             "from autoscope.config.loader import load_config",
             "",
             "def run():",
             "    config = load_config()",
-            "    driver = MobileDriver(config.mobile)",
+            "    driver = AndroidDriver(config.android)",
             "    device = driver.start()",
             "    try:",
         ]
@@ -212,8 +212,8 @@ class ScriptBuilder:
     def build(self) -> str:
         if self.platform == "web":
             return self.build_web_script()
-        if self.platform == "mobile":
-            return self.build_mobile_script()
+        if self.platform == "android":
+            return self.build_android_script()
         if self.platform == "ios":
             return self.build_ios_script()
         raise ValueError(f"Unsupported platform: {self.platform}")

@@ -1,17 +1,17 @@
 # AutoScope
 
-A minimal, batteries-included test harness for **web** (via Playwright), **Android mobile** (via ADB + uiautomator2), and **iOS** (via WebDriverAgent) — now with a **desktop app** for recording and replaying web/mobile tests, packaged for **macOS (.dmg), Windows (.exe), and Linux**.
+A minimal, batteries-included test harness for **web** (via Playwright), **Android** (via ADB + uiautomator2), and **iOS** (via WebDriverAgent) — now with a **desktop app** for recording and replaying web/Android/iOS tests, packaged for **macOS (.dmg), Windows (.exe), and Linux**.
 
 ## Features
 
 - **Desktop app** built with Flet (Flutter) for a modern, cross-platform native UI.
-- **Manual test recording** for web and mobile: perform actions and generate automation scripts.
-- **Auto test execution** of generated scripts for both web and mobile.
+- **Manual test recording** for web, Android, and iOS: perform actions and generate automation scripts.
+- **Auto test execution** of generated scripts for web, Android, and iOS.
 - Web testing with Chromium/Firefox/WebKit through Playwright.
 - Android testing through real ADB-connected devices using `uiautomator2`.
 - iOS testing (Simulator or real device) through WebDriverAgent using `wda`, including a full desktop **iOS Manual** recorder tab — macOS only (an Apple tooling requirement).
-- Screenshot-on-failure for web, mobile, and iOS.
-- Tag-based filtering (`web`, `mobile`, `ios`).
+- Screenshot-on-failure for web, Android, and iOS.
+- Tag-based filtering (`web`, `android`, `ios`).
 - JSON + HTML reports.
 - Pure stdlib `unittest` — no heavy test framework to learn.
 
@@ -50,8 +50,8 @@ Use the moon/sun icon at the bottom of the navigation rail to switch between lig
 
 ### Manual Recording
 
-1. Choose **Web Manual**, **Mobile Manual**, or **iOS Manual** from the navigation rail.
-2. Enter a start URL (web) or connect to a device (mobile/iOS — for iOS, start WebDriverAgent first, see Install).
+1. Choose **Web Manual**, **Android Manual**, or **iOS Manual** from the navigation rail.
+2. Enter a start URL (web) or connect to a device (Android/iOS — for iOS, start WebDriverAgent first, see Install).
 3. Click **Start Recording / Connect & Stream**.
 4. Interact with the browser or the streamed device screen. Use the camera button for a screenshot, or check "Record video" beforehand to also capture a video.
 5. Click **Stop & Save** to generate a Python script in `scripts/`, then optionally click **Run Test** to replay it immediately.
@@ -106,7 +106,7 @@ Output: `build/linux/`
 - Generated scripts and reports are stored in the app's writable data directory, not inside the bundle.
 - The first launch copies `config.yaml` into the app data directory so it can be edited later.
 - Playwright Chromium browsers are not bundled; on first launch the app prompts to install them, or you can run `playwright install chromium` separately.
-- `adb` is not bundled; it must be available on the user's PATH for mobile testing.
+- `adb` is not bundled; it must be available on the user's PATH for Android testing.
 - The iOS Manual recorder tab only works when the desktop app itself runs on macOS with WebDriverAgent already running (see Install).
 
 ## CLI Quick Start
@@ -123,10 +123,10 @@ Run only web tests:
 python -m autoscope.cli run --tag web
 ```
 
-Run only mobile tests:
+Run only Android tests:
 
 ```bash
-python -m autoscope.cli run --tag mobile
+python -m autoscope.cli run --tag android
 ```
 
 Run only iOS tests (start WebDriverAgent first — see Install):
@@ -163,8 +163,8 @@ Edit `config.yaml` or override with environment variables:
 
 - `AT_WEB_HEADLESS=true`
 - `AT_WEB_BROWSER=firefox`
-- `AT_MOBILE_DEVICE_SERIAL=<serial>`
-- `AT_MOBILE_APP_PACKAGE=com.example.app`
+- `AT_ANDROID_DEVICE_SERIAL=<serial>`
+- `AT_ANDROID_APP_PACKAGE=com.example.app`
 - `AT_IOS_WDA_URL=http://localhost:8100`
 - `AT_IOS_BUNDLE_ID=com.example.app`
 
@@ -174,7 +174,7 @@ Edit `config.yaml` or override with environment variables:
 from autoscope import AutomateTestCase
 
 class TestMyApp(AutomateTestCase):
-    tags = ("web",)          # or ("mobile",), ("ios",), or any combination
+    tags = ("web",)          # or ("android",), ("ios",), or any combination
 
     def test_login(self):
         self.web.goto("https://example.com/login")
@@ -183,14 +183,14 @@ class TestMyApp(AutomateTestCase):
         self.assertIn("dashboard", self.web.page.url)
 ```
 
-For mobile tests, `self.mobile` is a `uiautomator2` Device instance:
+For Android tests, `self.android` is a `uiautomator2` Device instance:
 
 ```python
 class TestAndroid(AutomateTestCase):
-    tags = ("mobile",)
+    tags = ("android",)
 
     def test_button(self):
-        self.mobile.device(text="OK").click()
+        self.android(text="OK").click()
 ```
 
 For iOS tests, `self.ios` is a `wda.Client` session (requires WebDriverAgent already running — see Install):
@@ -208,11 +208,11 @@ class TestIOS(AutomateTestCase):
 ```
 autoscope/
   config/       config loader
-  drivers/      web, mobile, ios, adb wrappers
+  drivers/      web, android, ios, adb wrappers
   core/         test base class + runner
   reporting/    JSON + HTML reporters
   cli.py        command-line entry point
 tests_web/      web test packages
-tests_mobile/   mobile test packages
+tests_android/  Android test packages
 tests_ios/      iOS test packages (requires a running WebDriverAgent)
 ```

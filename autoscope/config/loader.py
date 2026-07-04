@@ -21,8 +21,7 @@ class WebConfig:
 
 
 @dataclass
-class MobileConfig:
-    platform: str = "android"
+class AndroidConfig:
     device_serial: Optional[str] = None
     app_package: Optional[str] = None
     app_activity: Optional[str] = None
@@ -58,7 +57,7 @@ class RunnerConfig:
 @dataclass
 class Config:
     web: WebConfig = field(default_factory=WebConfig)
-    mobile: MobileConfig = field(default_factory=MobileConfig)
+    android: AndroidConfig = field(default_factory=AndroidConfig)
     ios: IOSConfig = field(default_factory=IOSConfig)
     runner: RunnerConfig = field(default_factory=RunnerConfig)
 
@@ -94,17 +93,17 @@ def load_config(path: str = "config.yaml") -> Config:
                     data_dict[f.name] = raw
 
     web_data = data.get("web", {})
-    mobile_data = data.get("mobile", {})
+    android_data = data.get("android", {})
     ios_data = data.get("ios", {})
     runner_data = data.get("runner", {})
     _env_override("AT_WEB", web_data, WebConfig)
-    _env_override("AT_MOBILE", mobile_data, MobileConfig)
+    _env_override("AT_ANDROID", android_data, AndroidConfig)
     _env_override("AT_IOS", ios_data, IOSConfig)
     _env_override("AT_RUNNER", runner_data, RunnerConfig)
 
     return Config(
         web=WebConfig(**web_data),
-        mobile=MobileConfig(**mobile_data),
+        android=AndroidConfig(**android_data),
         ios=IOSConfig(**ios_data),
         runner=RunnerConfig(**runner_data),
     )
