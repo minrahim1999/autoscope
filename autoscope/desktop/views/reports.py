@@ -41,17 +41,15 @@ class ReportsViewMixin:
             scroll=ft.ScrollMode.AUTO,
             controls=[
                 _section_title("Reports", ft.Icons.ASSESSMENT),
-                ft.ResponsiveRow(
+                ft.Row(
+                    wrap=True,
                     spacing=12,
                     run_spacing=12,
                     controls=[
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Open Reports Folder",
-                                icon=ft.Icons.FOLDER_OPEN,
-                                on_click=lambda _: self._open_folder(report_dir),
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 4, "lg": 3},
+                        ft.ElevatedButton(
+                            "Open Reports Folder",
+                            icon=ft.Icons.FOLDER_OPEN,
+                            on_click=lambda _: self._open_folder(report_dir),
                         ),
                     ],
                 ),

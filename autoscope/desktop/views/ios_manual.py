@@ -296,42 +296,40 @@ class IOSManualViewMixin:
             scroll=ft.ScrollMode.AUTO,
             controls=[
                 _section_title("iOS Manual Recorder", ft.Icons.PHONE_IPHONE),
-                ft.ResponsiveRow(
+                # Row(wrap=True) reflows based on real measured width instead
+                # of ResponsiveRow's breakpoint guessing (see home.py).
+                ft.Row(
+                    wrap=True,
                     spacing=12,
                     run_spacing=12,
                     controls=[
-                        ft.Container(content=name_field, col={"xs": 12, "sm": 12, "md": 4, "lg": 3}),
-                        ft.Container(content=video_checkbox, col={"xs": 12, "sm": 6, "md": 2, "lg": 2}),
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Connect & Stream",
-                                icon=ft.Icons.FIBER_MANUAL_RECORD,
-                                on_click=start_stream,
-                                bgcolor=ft.Colors.ERROR_CONTAINER,
-                                color=ft.Colors.ON_ERROR_CONTAINER,
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        name_field,
+                        video_checkbox,
+                        ft.ElevatedButton(
+                            "Connect & Stream",
+                            icon=ft.Icons.FIBER_MANUAL_RECORD,
+                            on_click=start_stream,
+                            bgcolor=ft.Colors.ERROR_CONTAINER,
+                            color=ft.Colors.ON_ERROR_CONTAINER,
                         ),
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Stop & Save",
-                                icon=ft.Icons.STOP,
-                                on_click=stop_stream,
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        ft.ElevatedButton(
+                            "Stop & Save",
+                            icon=ft.Icons.STOP,
+                            on_click=stop_stream,
                         ),
-                        ft.Container(content=screenshot_button, col={"xs": 6, "sm": 3, "md": 1, "lg": 1}),
-                        ft.Container(content=run_button, col={"xs": 12, "sm": 6, "md": 3, "lg": 2}),
+                        screenshot_button,
+                        run_button,
                     ],
                 ),
                 status_text,
-                ft.ResponsiveRow(
-                    expand=True,
+                ft.Row(
+                    wrap=True,
                     spacing=24,
                     run_spacing=24,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
                     controls=[
                         ft.Column(
-                            col={"xs": 12, "sm": 12, "md": 6, "lg": 5, "xl": 4},
+                            width=container_width,
                             controls=[
                                 ft.Container(
                                     content=screen_with_gesture,
@@ -350,8 +348,8 @@ class IOSManualViewMixin:
                             ],
                         ),
                         ft.Container(
-                            col={"xs": 12, "sm": 12, "md": 6, "lg": 7, "xl": 8},
-                            expand=True,
+                            width=480,
+                            height=container_height,
                             border_radius=12,
                             bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
                             padding=12,

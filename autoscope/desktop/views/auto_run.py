@@ -101,27 +101,25 @@ class AutoRunViewMixin:
             scroll=ft.ScrollMode.AUTO,
             controls=[
                 _section_title("Auto Run", ft.Icons.PLAY_CIRCLE),
-                ft.ResponsiveRow(
+                # Row(wrap=True) reflows based on real measured width instead
+                # of ResponsiveRow's breakpoint guessing (see home.py).
+                ft.Row(
+                    wrap=True,
                     spacing=12,
                     run_spacing=12,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Refresh",
-                                icon=ft.Icons.REFRESH,
-                                on_click=lambda _: (refresh_scripts(), self.page.update()),
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        ft.ElevatedButton(
+                            "Refresh",
+                            icon=ft.Icons.REFRESH,
+                            on_click=lambda _: (refresh_scripts(), self.page.update()),
                         ),
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Run Selected",
-                                icon=ft.Icons.PLAY_ARROW,
-                                on_click=run_script,
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        ft.ElevatedButton(
+                            "Run Selected",
+                            icon=ft.Icons.PLAY_ARROW,
+                            on_click=run_script,
                         ),
-                        ft.Container(content=progress, col={"xs": 12, "sm": 12, "md": 1, "lg": 1}),
+                        progress,
                     ],
                 ),
                 result_text,

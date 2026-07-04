@@ -4,13 +4,15 @@ from typing import Callable
 
 import flet as ft
 
+_CARD_WIDTH = 260
+
 
 class HomeViewMixin:
     def _show_home(self) -> None:
         def card(title: str, subtitle: str, icon, on_click: Callable) -> ft.Card:
             return ft.Card(
                 elevation=2,
-                col={"xs": 12, "sm": 6, "md": 4, "lg": 4, "xl": 4},
+                width=_CARD_WIDTH,
                 content=ft.Container(
                     padding=24,
                     on_click=on_click,
@@ -46,7 +48,14 @@ class HomeViewMixin:
                     size=16,
                     text_align=ft.TextAlign.CENTER,
                 ),
-                ft.ResponsiveRow(
+                # Row(wrap=True) reflows based on the actual measured width of
+                # this container, unlike ResponsiveRow (whose Bootstrap-style
+                # breakpoints are keyed to an ambiguous reference width that
+                # doesn't account for the nav rail eating into the available
+                # space) -- so this stays readable at any window size instead
+                # of picking a column count that doesn't leave room to fit.
+                ft.Row(
+                    wrap=True,
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=24,
                     run_spacing=24,

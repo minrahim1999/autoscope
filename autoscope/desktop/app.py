@@ -99,6 +99,7 @@ class DesktopApp(
         self.page.window.min_width = 720
         self.page.window.min_height = 540
         self.page.window.resizable = True
+        self.page.window.maximized = True
         self.page.on_resized = self._on_resized
 
     def _on_resized(self, e) -> None:

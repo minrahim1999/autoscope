@@ -17,7 +17,7 @@ class WebManualViewMixin:
         url_field = ft.TextField(
             label="Start URL",
             value=self.config.web.base_url,
-            expand=True,
+            width=360,
             prefix_icon=ft.Icons.LINK,
         )
         name_field = ft.TextField(
@@ -203,33 +203,30 @@ class WebManualViewMixin:
             scroll=ft.ScrollMode.AUTO,
             controls=[
                 _section_title("Web Manual Recorder", ft.Icons.WEB),
-                ft.ResponsiveRow(
+                # Row(wrap=True) reflows based on real measured width instead
+                # of ResponsiveRow's breakpoint guessing (see home.py).
+                ft.Row(
+                    wrap=True,
                     spacing=12,
                     run_spacing=12,
                     controls=[
-                        ft.Container(content=url_field, col={"xs": 12, "sm": 12, "md": 6, "lg": 5}),
-                        ft.Container(content=name_field, col={"xs": 12, "sm": 6, "md": 3, "lg": 2}),
-                        ft.Container(content=video_checkbox, col={"xs": 12, "sm": 6, "md": 3, "lg": 2}),
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Start Recording",
-                                icon=ft.Icons.FIBER_MANUAL_RECORD,
-                                on_click=start_recording,
-                                bgcolor=ft.Colors.ERROR_CONTAINER,
-                                color=ft.Colors.ON_ERROR_CONTAINER,
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        url_field,
+                        name_field,
+                        video_checkbox,
+                        ft.ElevatedButton(
+                            "Start Recording",
+                            icon=ft.Icons.FIBER_MANUAL_RECORD,
+                            on_click=start_recording,
+                            bgcolor=ft.Colors.ERROR_CONTAINER,
+                            color=ft.Colors.ON_ERROR_CONTAINER,
                         ),
-                        ft.Container(
-                            content=ft.ElevatedButton(
-                                "Stop & Save",
-                                icon=ft.Icons.STOP,
-                                on_click=stop_recording,
-                            ),
-                            col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
+                        ft.ElevatedButton(
+                            "Stop & Save",
+                            icon=ft.Icons.STOP,
+                            on_click=stop_recording,
                         ),
-                        ft.Container(content=screenshot_button, col={"xs": 6, "sm": 3, "md": 1, "lg": 1}),
-                        ft.Container(content=run_button, col={"xs": 12, "sm": 6, "md": 3, "lg": 2}),
+                        screenshot_button,
+                        run_button,
                     ],
                 ),
                 status_text,
