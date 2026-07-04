@@ -1,0 +1,200 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Determine next version
+        id: bump
+        run: |
+          git fetch --tags
+          latest=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          if [ -z "$latest" ]; then
+            major=0; minor=1; patch=0
+          else
+            version=${latest#v}
+            IFS='.' read -r major minor patch <<< "$version"
+          fi
+
+          bump="${{ github.event.inputs.bump || 'patch' }}"
+          if [ "$bump" = "major" ]; then
+            major=$((major+1)); minor=0; patch=0
+          elif [ "$bump" = "minor" ]; then
+            minor=$((minor+1)); patch=0
+          else
+            patch=$((patch+1))
+          fi
+
+          new_version="${major}.${minor}.${patch}"
+          echo "version=$new_version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$new_version" >> "$GITHUB_OUTPUT"
+          echo "Next version: v$new_version"
+
+  build-macos:
+    needs: tag
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Build macOS app and DMG
+        run: ./packaging/build_macos.sh
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoscope-macos
+          path: build/macos/*.dmg
+          if-no-files-found: error
+
+  build-windows:
+    needs: tag
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Build Windows app
+        shell: pwsh
+        run: ./packaging/build_windows.ps1
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoscope-windows
+          path: build/windows/**/**
+          if-no-files-found: error
+
+  build-linux:
+    needs: tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Build Linux app
+        run: ./packaging/build_linux.sh
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoscope-linux
+          path: build/linux/**
+          if-no-files-found: error
+
+  release:
+    needs: [tag, build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ needs.tag.outputs.tag }}" -m "Release ${{ needs.tag.outputs.tag }}"
+          git push origin "${{ needs.tag.outputs.tag }}"
+
+      - name: Package artifacts
+        run: |
+          mkdir -p release
+          if [ -d artifacts/autoscope-macos ]; then
+            cp artifacts/autoscope-macos/*.dmg release/ || true
+          fi
+          if [ -d artifacts/autoscope-windows ]; then
+            (cd artifacts/autoscope-windows && zip -r ../../release/AutoScope-windows.zip .)
+          fi
+          if [ -d artifacts/autoscope-linux ]; then
+            (cd artifacts/autoscope-linux && tar -czf ../../release/AutoScope-linux.tar.gz .)
+          fi
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.tag.outputs.tag }}
+          name: AutoScope ${{ needs.tag.outputs.tag }}
+          generate_release_notes: true
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

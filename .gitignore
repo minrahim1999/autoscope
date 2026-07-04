@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Build/packaging output (flet build)
+build/
+dist/
+
+# Runtime-generated app data (never meant to be committed)
+scripts/*.py
+var/
+desktop_settings.json
+
+# OS cruft
+.DS_Store

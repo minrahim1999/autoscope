@@ -1,0 +1,40 @@
+# AutoScope configuration
+web:
+  browser: chromium        # chromium | firefox | webkit
+  headless: false
+  base_url: https://example.com
+  timeout_ms: 30000
+  viewport:
+    width: 1280
+    height: 720
+  screenshot_on_failure: true
+  screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
+  login_selectors:
+    username: ["input[type='email']", "input[name='email']", "input[name='username']", "#username"]
+    password: ["input[type='password']", "input[name='password']", "#password"]
+    submit: ["button:has-text('Login')", "button:has-text('Log in')", "button:has-text('Sign in')", "button[type='submit']", "input[type='submit']"]
+
+android:
+  device_serial: null      # null = use first available adb device
+  app_package: null        # e.g. com.example.app
+  app_activity: null       # e.g. .MainActivity
+  install_apk: null        # path to apk to install before tests
+  uninstall_before: false
+  screenshot_on_failure: true
+  screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
+
+ios:
+  wda_url: http://localhost:8100  # WebDriverAgent must already be running; see tools/start_ios_wda.sh
+  bundle_id: null                 # e.g. com.example.app; null attaches to whatever's in the foreground
+  screenshot_on_failure: true
+  screenshot_dir: var/reports/screenshots
+  video_dir: var/reports/videos
+
+runner:
+  output_dir: var/reports
+  json_report: var/reports/results.json
+  html_report: var/reports/report.html
+  fail_fast: false
+  verbosity: 2
