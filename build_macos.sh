@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo "Building AutoScope for macOS..."
 
-flet build macos --project autoscope --product "AutoScope"
+flet build macos --project autoscope --product "AutoScope" --yes --no-rich-output
 
 echo "Build complete. App bundle: build/macos/AutoScope.app"
 

@@ -6,6 +6,6 @@ set -euo pipefail
 
 echo "Building AutoScope for Linux..."
 
-flet build linux --project autoscope --product "AutoScope"
+flet build linux --project autoscope --product "AutoScope" --yes --no-rich-output
 
 echo "Build complete. Executable: build/linux/"
