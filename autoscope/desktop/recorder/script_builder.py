@@ -72,11 +72,13 @@ class ScriptBuilder:
                 selector = act.data.get("selector", "")
                 if selector:
                     lines.append(f"        page.click({self._quote(selector)})")
+                    lines.append("        page.wait_for_timeout(400)")
             elif act.action == "fill":
                 selector = act.data.get("selector", "")
                 value = act.data.get("value", "")
                 if selector:
                     lines.append(f"        page.fill({self._quote(selector)}, {self._quote(value)})")
+                    lines.append("        page.wait_for_timeout(400)")
             elif act.action == "wait":
                 ms = act.data.get("ms", 1000)
                 lines.append(f"        page.wait_for_timeout({ms})")
@@ -86,6 +88,11 @@ class ScriptBuilder:
 
         if len(lines) == body_start:
             lines.append("        pass")
+        else:
+            # Hold the final page on screen briefly -- without this the
+            # headed browser closes the instant the last action finishes,
+            # which in Auto Run replay looks like Chrome never opened.
+            lines.append("        page.wait_for_timeout(1500)")
 
         lines.extend(
             [

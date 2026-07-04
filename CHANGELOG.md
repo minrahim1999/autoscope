@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Auto Run web replay closing Chrome before it was visible**: generated web scripts had zero pacing between recorded actions, so a headed Chrome window would open, run through every click/fill, and close again in about a second — too fast to actually watch. `ScriptBuilder.build_web_script()` (`autoscope/desktop/recorder/script_builder.py`) now inserts a 400ms `page.wait_for_timeout()` after each recorded click/fill and holds the final page for 1500ms before `driver.stop()`. Only affects newly generated scripts; re-record or hand-edit existing ones under `scripts/` to pick up the pacing.
+
 ### Changed
 - **Consolidated `tests_web/`, `tests_android/`, `tests_ios/`, and `tests_core/` into one `tests/` package** (`tests/web/`, `tests/android/`, `tests/ios/`, `tests/core/`). Tag-based filtering (`--tag web/android/ios`) and default discovery (`unittest.TestLoader().discover()` from `.`) are both unaffected — tags come from `test.__class__.tags`, not directory layout, and discovery already recurses into any package with an `__init__.py`. Only `--start-dir tests_web`-style examples in the docs needed updating (now `--start-dir tests/web`).
 - Deleted the leftover example scripts that had accumulated under `scripts/` from live-testing the recorders this session (`android_check_android.py`, `test_login_android.py`, `rerun_check_android.py`, `android_recording_test_android.py`, `test_login_web.py`) — these were throwaway artifacts of manual testing, not real examples worth keeping. `scripts/*.py` is now gitignored going forward, consistent with `var/` already being gitignored for reports: generated files from *using* the app were never meant to be committed.
