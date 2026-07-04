@@ -23,12 +23,20 @@ from autoscope.desktop.setup import check_adb, check_playwright_browsers, instal
 
 
 def _snack(page: ft.Page, message: str, color: Optional[str] = None) -> None:
-    page.show_snack_bar(
-        ft.SnackBar(
-            content=ft.Text(message),
-            bgcolor=color or ft.Colors.ON_PRIMARY_CONTAINER,
-        )
+    sb = ft.SnackBar(
+        content=ft.Text(message),
+        bgcolor=color or ft.Colors.ON_PRIMARY_CONTAINER,
     )
+
+    def _remove(_: ft.ControlEvent) -> None:
+        if sb in page.overlay:
+            page.overlay.remove(sb)
+            page.update()
+
+    sb.on_dismiss = _remove
+    page.overlay.append(sb)
+    sb.open = True
+    page.update()
 
 
 def _section_title(text: str, icon: Optional[str] = None) -> ft.Row:
@@ -59,6 +67,7 @@ class DesktopApp:
         self._web_recorder: Optional[WebRecorder] = None
         self._mobile_recorder: Optional[MobileRecorder] = None
         self._script_runner = ScriptRunner(self.config)
+        self._theme_button: Optional[ft.IconButton] = None
 
         self._setup_page()
         self._build_ui()
@@ -117,7 +126,7 @@ class DesktopApp:
         self.page.window.resizable = True
         self.page.on_resized = self._on_resized
 
-    def _on_resized(self, e: ft.WindowResizeEvent) -> None:
+    def _on_resized(self, e) -> None:
         """Re-layout the current view when the window size changes."""
         self._navigate(self._selected_index)
 
@@ -127,7 +136,7 @@ class DesktopApp:
         self.navigation_rail = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
+            min_width=130,
             min_extended_width=200,
             group_alignment=-0.9,
             destinations=[
@@ -160,31 +169,61 @@ class DesktopApp:
             on_change=lambda e: self._navigate(e.control.selected_index),
         )
 
+        is_dark = self.page.theme_mode == ft.ThemeMode.DARK
+        self._theme_button = ft.IconButton(
+            icon=ft.Icons.LIGHT_MODE if is_dark else ft.Icons.DARK_MODE,
+            tooltip="Toggle theme",
+            on_click=self._toggle_theme,
+        )
+
         self.page.add(
             ft.Row(
                 expand=True,
                 controls=[
-                    self.navigation_rail,
+                    ft.Column(
+                        width=130,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Container(expand=True, content=self.navigation_rail),
+                            ft.Container(
+                                padding=8,
+                                content=self._theme_button,
+                            ),
+                        ],
+                    ),
                     ft.VerticalDivider(width=1),
                     self.content_area,
                 ],
             )
         )
 
+    def _toggle_theme(self, _: ft.ControlEvent) -> None:
+        if self.page.theme_mode == ft.ThemeMode.DARK:
+            self.page.theme_mode = ft.ThemeMode.LIGHT
+            self._theme_button.icon = ft.Icons.DARK_MODE
+        else:
+            self.page.theme_mode = ft.ThemeMode.DARK
+            self._theme_button.icon = ft.Icons.LIGHT_MODE
+        self._theme_button.tooltip = "Toggle theme"
+        self.page.update()
+
     def _navigate(self, index: int) -> None:
         self._selected_index = index
         if self.navigation_rail:
             self.navigation_rail.selected_index = index
-        if index == 0:
-            self._show_home()
-        elif index == 1:
-            self._show_web_manual()
-        elif index == 2:
-            self._show_mobile_manual()
-        elif index == 3:
-            self._show_auto_run()
-        elif index == 4:
-            self._show_reports()
+        try:
+            if index == 0:
+                self._show_home()
+            elif index == 1:
+                self._show_web_manual()
+            elif index == 2:
+                self._show_mobile_manual()
+            elif index == 3:
+                self._show_auto_run()
+            elif index == 4:
+                self._show_reports()
+        except Exception as e:
+            _snack(self.page, f"Navigation error: {e}", ft.Colors.ERROR)
         self.page.update()
 
     # ------------------------------------------------------------------
@@ -257,7 +296,6 @@ class DesktopApp:
                 ),
             ],
         )
-        self.content_area.update()
 
     # ------------------------------------------------------------------
     # Web Manual
@@ -394,7 +432,6 @@ class DesktopApp:
                 ),
             ],
         )
-        self.content_area.update()
 
     # ------------------------------------------------------------------
     # Mobile Manual
@@ -408,6 +445,7 @@ class DesktopApp:
         )
         status_text = ft.Text("Ready", color=ft.Colors.ON_SURFACE_VARIANT)
         screen_image = ft.Image(
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
             width=360,
             height=640,
             fit=ft.BoxFit.FILL,
@@ -587,7 +625,7 @@ class DesktopApp:
                             controls=[
                                 ft.Container(
                                     content=screen_with_gesture,
-                                    alignment=ft.alignment.center,
+                                    alignment=ft.Alignment.CENTER,
                                 ),
                                 ft.Row(
                                     controls=[
@@ -613,7 +651,6 @@ class DesktopApp:
                 ),
             ],
         )
-        self.content_area.update()
 
     # ------------------------------------------------------------------
     # Auto Run
@@ -644,14 +681,15 @@ class DesktopApp:
                             selected=selected_script == script,
                         )
                     )
-            script_list.update()
+            # Update is deferred to the caller because this helper runs
+            # before script_list is added to the page during initial build.
 
         def select_script(script: Path) -> None:
             nonlocal selected_script
             selected_script = script
             result_text.value = f"Selected: {script.name}"
             refresh_scripts()
-            result_text.update()
+            self.page.update()
 
         def run_script(_: ft.ControlEvent) -> None:
             if not selected_script:
@@ -707,7 +745,7 @@ class DesktopApp:
                             content=ft.ElevatedButton(
                                 "Refresh",
                                 icon=ft.Icons.REFRESH,
-                                on_click=lambda _: refresh_scripts(),
+                                on_click=lambda _: (refresh_scripts(), self.page.update()),
                             ),
                             col={"xs": 12, "sm": 6, "md": 3, "lg": 2},
                         ),
@@ -732,7 +770,6 @@ class DesktopApp:
                 ),
             ],
         )
-        self.content_area.update()
 
     # ------------------------------------------------------------------
     # Reports
@@ -790,7 +827,6 @@ class DesktopApp:
                 ),
             ],
         )
-        self.content_area.update()
 
     def _open_folder(self, path: Path) -> None:
         if sys.platform == "darwin":

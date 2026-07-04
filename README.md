@@ -39,6 +39,8 @@ python run_desktop.py
 ./run_desktop.sh
 ```
 
+Use the moon/sun icon at the bottom of the navigation rail to switch between light and dark themes.
+
 ### Manual Recording
 
 1. Choose **Web Manual** or **Mobile Manual** from the navigation rail.

@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Light/dark theme toggle in the desktop app navigation rail.
+
 ### Fixed
+- Fixed desktop app home page appearing empty on startup; navigation now refreshes the whole page once after building each view.
+- Fixed **Mobile Manual** and **Auto Run** tabs failing to open due to Flet 0.85 API changes (`ft.Image` now requires `src`, `ft.alignment.center` replaced with `ft.Alignment.CENTER`, snackbar uses `page.overlay`).
+- Fixed **Auto Run** script list throwing "Control must be added to the page first" during initial render.
+- Widened the navigation rail so all labels, including "Mobile Manual", stay centered on a single line.
 - Made cross-platform build scripts (`build_macos.sh`, `build_linux.sh`, `build_windows.ps1`) non-interactive and safe for CI by adding `--yes` and `--no-rich-output` flags.
 - Bypassed rich Windows console crash on CI runners by piping `flet build` output through a log file and setting UTF-8 console/env encoding.
 
