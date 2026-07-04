@@ -28,7 +28,12 @@ class AutoRunViewMixin:
             else:
                 for script in scripts:
                     platform = ScriptRunner.detect_platform(script)
-                    icon = ft.Icons.WEB if platform == "web" else ft.Icons.SMARTPHONE
+                    if platform == "web":
+                        icon = ft.Icons.WEB
+                    elif platform == "ios":
+                        icon = ft.Icons.PHONE_IPHONE
+                    else:
+                        icon = ft.Icons.SMARTPHONE
                     script_list.controls.append(
                         ft.ListTile(
                             leading=ft.Icon(icon),

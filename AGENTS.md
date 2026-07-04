@@ -4,7 +4,7 @@ Compact guidance for OpenCode sessions working in this repo.
 
 ## Project shape
 
-- Python package `autoscope/` is a minimal test harness for **web** (Playwright), **Android mobile** (`uiautomator2` + `adb`), and **iOS** (WebDriverAgent via `wda`, macOS only, CLI-only for now — no desktop recorder UI).
+- Python package `autoscope/` is a minimal test harness for **web** (Playwright), **Android mobile** (`uiautomator2` + `adb`), and **iOS** (WebDriverAgent via `wda`). The iOS recorder/driver requires the desktop app to run on macOS.
 - Three usage modes:
   1. **CLI**: `python -m autoscope.cli`
   2. **Desktop recorder / runner**: `python run_desktop.py` (Flet UI)
@@ -90,7 +90,7 @@ python run_desktop.py
 
 ## Generated scripts & desktop app
 
-- The desktop recorder writes scripts to `scripts/`. Web and mobile only — no iOS recorder UI yet.
+- The desktop recorder writes scripts to `scripts/`, for web, mobile, and iOS (Web Manual, Mobile Manual, iOS Manual tabs).
 - A generated script is a plain Python file with a `run()` function.
 - Its platform is detected from the first-line comment, e.g. `# platform: web` or `# platform: mobile`.
 - The desktop **Auto Run** tab executes these scripts in a subprocess via `autoscope/desktop/runner/script_runner.py` and writes `var/reports/auto_results.json` + `var/reports/auto_report.html`.

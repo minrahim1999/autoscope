@@ -24,6 +24,12 @@ class TestScriptBuilderEmptyRecordings(unittest.TestCase):
         self.assertIn("pass", source)
         compile(source, "<test>", "exec")
 
+    def test_empty_ios_script_compiles(self) -> None:
+        builder = ScriptBuilder(platform="ios", name="empty")
+        source = builder.build()
+        self.assertIn("pass", source)
+        compile(source, "<test>", "exec")
+
 
 class TestScriptBuilderMobileActions(unittest.TestCase):
     def setUp(self) -> None:
@@ -49,6 +55,33 @@ class TestScriptBuilderMobileActions(unittest.TestCase):
         source = self.builder.build()
         self.assertNotIn("device.click", source)
         self.assertNotIn("driver.adb.run(['shell', 'input'", source)
+        self.assertIn("        pass\n", source)
+
+
+class TestScriptBuilderIOSActions(unittest.TestCase):
+    def setUp(self) -> None:
+        self.builder = ScriptBuilder(platform="ios", name="flow")
+
+    def test_records_tap_input_swipe_wait_screenshot(self) -> None:
+        self.builder.add("tap", {"x": 201, "y": 437})
+        self.builder.add("input", {"text": "hello"})
+        self.builder.add("swipe", {"x1": 0, "y1": 0, "x2": 100, "y2": 100, "duration": 250})
+        self.builder.add("wait", {"ms": 500})
+        self.builder.add("screenshot", {"name": "shot.png"})
+
+        source = self.builder.build()
+        compile(source, "<test>", "exec")
+
+        self.assertIn("session.tap(201, 437)", source)
+        self.assertIn("session.send_keys('hello')", source)
+        self.assertIn("session.swipe(0, 0, 100, 100, 0.25)", source)
+        self.assertIn("time.sleep(0.5)", source)
+        self.assertIn("driver.screenshot('shot.png')", source)
+
+    def test_no_actions_produces_no_platform_specific_calls(self) -> None:
+        source = self.builder.build()
+        self.assertNotIn("session.tap", source)
+        self.assertNotIn("session.send_keys", source)
         self.assertIn("        pass\n", source)
 
 

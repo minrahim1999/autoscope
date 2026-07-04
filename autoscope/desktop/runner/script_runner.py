@@ -39,6 +39,8 @@ class ScriptRunner:
             return "web"
         if "_mobile" in name:
             return "mobile"
+        if "_ios" in name:
+            return "ios"
         return "unknown"
 
     def run(self, script_path: Path) -> Dict:

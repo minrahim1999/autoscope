@@ -155,11 +155,67 @@ class ScriptBuilder:
         )
         return "\n".join(lines)
 
+    def build_ios_script(self) -> str:
+        lines = [
+            f"# platform: ios",
+            f"# name: {self.name}",
+            f"# generated: {datetime.now().isoformat()}",
+            "import time",
+            "from autoscope.drivers.ios import IOSDriver",
+            "from autoscope.config.loader import load_config",
+            "",
+            "def run():",
+            "    config = load_config()",
+            "    driver = IOSDriver(config.ios)",
+            "    session = driver.start()",
+            "    try:",
+        ]
+        body_start = len(lines)
+
+        for act in self.actions:
+            if act.action == "tap":
+                x = act.data.get("x", 0)
+                y = act.data.get("y", 0)
+                lines.append(f"        session.tap({x}, {y})")
+            elif act.action == "input":
+                text = act.data.get("text", "")
+                lines.append(f"        session.send_keys({self._quote(text)})")
+            elif act.action == "swipe":
+                x1 = act.data.get("x1", 0)
+                y1 = act.data.get("y1", 0)
+                x2 = act.data.get("x2", 0)
+                y2 = act.data.get("y2", 0)
+                duration = act.data.get("duration", 300)
+                lines.append(f"        session.swipe({x1}, {y1}, {x2}, {y2}, {duration / 1000.0})")
+            elif act.action == "wait":
+                ms = act.data.get("ms", 1000)
+                lines.append(f"        time.sleep({ms / 1000.0})")
+            elif act.action == "screenshot":
+                name = act.data.get("name", "screenshot.png")
+                lines.append(f"        driver.screenshot({self._quote(name)})")
+
+        if len(lines) == body_start:
+            lines.append("        pass")
+
+        lines.extend(
+            [
+                "    finally:",
+                "        driver.stop()",
+                "",
+                'if __name__ == "__main__":',
+                "    run()",
+                "",
+            ]
+        )
+        return "\n".join(lines)
+
     def build(self) -> str:
         if self.platform == "web":
             return self.build_web_script()
         if self.platform == "mobile":
             return self.build_mobile_script()
+        if self.platform == "ios":
+            return self.build_ios_script()
         raise ValueError(f"Unsupported platform: {self.platform}")
 
     def save(self, directory: Optional[Path] = None) -> Path:

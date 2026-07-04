@@ -9,7 +9,7 @@ A minimal, batteries-included test harness for **web** (via Playwright), **Andro
 - **Auto test execution** of generated scripts for both web and mobile.
 - Web testing with Chromium/Firefox/WebKit through Playwright.
 - Android testing through real ADB-connected devices using `uiautomator2`.
-- iOS testing (Simulator or real device) through WebDriverAgent using `wda` — CLI/`AutomateTestCase` only for now, no desktop recorder UI, macOS only.
+- iOS testing (Simulator or real device) through WebDriverAgent using `wda`, including a full desktop **iOS Manual** recorder tab — macOS only (an Apple tooling requirement).
 - Screenshot-on-failure for web, mobile, and iOS.
 - Tag-based filtering (`web`, `mobile`, `ios`).
 - JSON + HTML reports.
@@ -50,11 +50,11 @@ Use the moon/sun icon at the bottom of the navigation rail to switch between lig
 
 ### Manual Recording
 
-1. Choose **Web Manual** or **Mobile Manual** from the navigation rail.
-2. Enter a start URL (web) or connect to a device (mobile).
+1. Choose **Web Manual**, **Mobile Manual**, or **iOS Manual** from the navigation rail.
+2. Enter a start URL (web) or connect to a device (mobile/iOS — for iOS, start WebDriverAgent first, see Install).
 3. Click **Start Recording / Connect & Stream**.
-4. Interact with the browser or the streamed device screen.
-5. Click **Stop & Save** to generate a Python script in `scripts/`.
+4. Interact with the browser or the streamed device screen. Use the camera button for a screenshot, or check "Record video" beforehand to also capture a video.
+5. Click **Stop & Save** to generate a Python script in `scripts/`, then optionally click **Run Test** to replay it immediately.
 
 ### Auto Run
 
@@ -107,7 +107,7 @@ Output: `build/linux/`
 - The first launch copies `config.yaml` into the app data directory so it can be edited later.
 - Playwright Chromium browsers are not bundled; on first launch the app prompts to install them, or you can run `playwright install chromium` separately.
 - `adb` is not bundled; it must be available on the user's PATH for mobile testing.
-- iOS is not part of the desktop app at all yet (CLI/`AutomateTestCase` only).
+- The iOS Manual recorder tab only works when the desktop app itself runs on macOS with WebDriverAgent already running (see Install).
 
 ## CLI Quick Start
 

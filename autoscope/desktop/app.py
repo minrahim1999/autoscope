@@ -7,6 +7,7 @@ import flet as ft
 
 from autoscope.config.loader import load_config
 from autoscope.desktop.paths import get_app_dir, get_config_path, is_packaged
+from autoscope.desktop.recorder.ios_recorder import IOSRecorder
 from autoscope.desktop.recorder.mobile_recorder import MobileRecorder
 from autoscope.desktop.recorder.web_recorder import WebRecorder
 from autoscope.desktop.runner.script_runner import ScriptRunner
@@ -14,6 +15,7 @@ from autoscope.desktop.setup import check_adb, check_playwright_browsers, instal
 from autoscope.desktop.views.auto_run import AutoRunViewMixin
 from autoscope.desktop.views.common import _snack
 from autoscope.desktop.views.home import HomeViewMixin
+from autoscope.desktop.views.ios_manual import IOSManualViewMixin
 from autoscope.desktop.views.mobile_manual import MobileManualViewMixin
 from autoscope.desktop.views.reports import ReportsViewMixin
 from autoscope.desktop.views.web_manual import WebManualViewMixin
@@ -23,6 +25,7 @@ class DesktopApp(
     HomeViewMixin,
     WebManualViewMixin,
     MobileManualViewMixin,
+    IOSManualViewMixin,
     AutoRunViewMixin,
     ReportsViewMixin,
 ):
@@ -37,6 +40,7 @@ class DesktopApp(
         self.config = load_config()
         self._web_recorder: Optional[WebRecorder] = None
         self._mobile_recorder: Optional[MobileRecorder] = None
+        self._ios_recorder: Optional[IOSRecorder] = None
         self._script_runner = ScriptRunner(self.config)
         self._theme_button: Optional[ft.IconButton] = None
 
@@ -127,6 +131,11 @@ class DesktopApp(
                     label="Mobile Manual",
                 ),
                 ft.NavigationRailDestination(
+                    icon=ft.Icons.PHONE_IPHONE_OUTLINED,
+                    selected_icon=ft.Icons.PHONE_IPHONE,
+                    label="iOS Manual",
+                ),
+                ft.NavigationRailDestination(
                     icon=ft.Icons.PLAY_CIRCLE_OUTLINED,
                     selected_icon=ft.Icons.PLAY_CIRCLE,
                     label="Auto Run",
@@ -190,8 +199,10 @@ class DesktopApp(
             elif index == 2:
                 self._show_mobile_manual()
             elif index == 3:
-                self._show_auto_run()
+                self._show_ios_manual()
             elif index == 4:
+                self._show_auto_run()
+            elif index == 5:
                 self._show_reports()
         except Exception as e:
             _snack(self.page, f"Navigation error: {e}", ft.Colors.ERROR)

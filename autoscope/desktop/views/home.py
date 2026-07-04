@@ -42,7 +42,7 @@ class HomeViewMixin:
                     color=ft.Colors.PRIMARY,
                 ),
                 ft.Text(
-                    "Record manual interactions and replay them automatically for web and mobile.",
+                    "Record manual interactions and replay them automatically for web, mobile, and iOS.",
                     size=16,
                     text_align=ft.TextAlign.CENTER,
                 ),
@@ -64,10 +64,16 @@ class HomeViewMixin:
                             lambda _: self._navigate(2),
                         ),
                         card(
+                            "iOS Manual",
+                            "Stream a Simulator/device via WebDriverAgent, tap and type, then generate a script.",
+                            ft.Icons.PHONE_IPHONE,
+                            lambda _: self._navigate(3),
+                        ),
+                        card(
                             "Auto Run",
                             "Run generated scripts and view pass/fail reports.",
                             ft.Icons.PLAY_CIRCLE,
-                            lambda _: self._navigate(3),
+                            lambda _: self._navigate(4),
                         ),
                     ],
                 ),
