@@ -1,0 +1,50 @@
+[project]
+name = "autoscope"
+version = "1.0.0"
+description = "Web and Android test recorder, runner, and crawler"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flet>=0.85.0",
+    "playwright>=1.40.0",
+    "uiautomator2>=2.16.0",
+    "PyYAML>=6.0",
+    "Pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.flet]
+product = "AutoScope"
+company = "AutoScope"
+copyright = "Copyright © 2026 AutoScope"
+org = "com.autoscope"
+
+[tool.flet.app]
+path = "."
+module = "main.py"
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "reports",
+    "scripts",
+    "*.pyc",
+    "*.pyo",
+    ".DS_Store",
+]
+
+[tool.flet.macos]
+artifact = "AutoScope"
+
+[tool.flet.windows]
+artifact = "AutoScope"
+
+[tool.flet.linux]
+artifact = "AutoScope"

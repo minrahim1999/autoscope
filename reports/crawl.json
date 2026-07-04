@@ -1,0 +1,73 @@
+{
+  "type": "crawl",
+  "base_url": "https://staging-ucaringiot.lcpsolution.com/login",
+  "duration_seconds": 10.978254079818726,
+  "summary": {
+    "total": 10,
+    "ok": 10,
+    "broken": 0
+  },
+  "visited": [
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/login",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_001_login.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/terms_of_service_dual",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_002_terms_of_service_dual.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/api-logs",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_003_admin_api-logs.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/finance/credit-transactions",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_004_admin_finance_credit-transactions.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/gender",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_005_admin_gender.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/report/member_active",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_006_admin_report_member_active.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/privacy_policy_dual",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_007_privacy_policy_dual.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/nationality",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_008_admin_nationality.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/ads_type",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_009_admin_ads_type.png"
+    },
+    {
+      "url": "https://staging-ucaringiot.lcpsolution.com/admin/finance/wallets",
+      "status": 200,
+      "ok": true,
+      "screenshot": "reports/screenshots/crawl_010_admin_finance_wallets.png"
+    }
+  ],
+  "broken": []
+}

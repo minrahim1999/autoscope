@@ -1,0 +1,18 @@
+{
+  "duration_seconds": 0.09661507606506348,
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 0,
+    "errors": 1,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "name": "setUpClass (tests_mobile.test_example_mobile.TestExampleMobile)",
+      "status": "error",
+      "message": "No Android device connected via adb.",
+      "traceback": "Traceback (most recent call last):\n\n  File \"/Users/muhaimin/.pyenv/versions/3.10.17/lib/python3.10/unittest/suite.py\", line 166, in _handleClassSetUp\n    setUpClass()\n\n  File \"/Users/muhaimin/Documents/01-Projects/Automate-Test/automate_tester/core/case.py\", line 35, in setUpClass\n    cls.mobile = cls._mobile_driver.start()\n\n  File \"/Users/muhaimin/Documents/01-Projects/Automate-Test/automate_tester/drivers/mobile.py\", line 23, in start\n    self.config.device_serial = self.serial\n\n  File \"/Users/muhaimin/Documents/01-Projects/Automate-Test/automate_tester/drivers/mobile.py\", line 20, in serial\n    return self.config.device_serial or self.adb.first_device()\n\n  File \"/Users/muhaimin/Documents/01-Projects/Automate-Test/automate_tester/drivers/adb.py\", line 50, in first_device\n    raise ADBError(\"No Android device connected via adb.\")\n\nautomate_tester.drivers.adb.ADBError: No Android device connected via adb.\n"
+    }
+  ]
+}
