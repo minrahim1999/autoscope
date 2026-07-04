@@ -39,7 +39,7 @@ python -m autoscope.cli run --tag mobile
 # Run a single test module/class by limiting the start dir + pattern
 python -m autoscope.cli run --start-dir tests_web --pattern test_example_web.py
 
-# Crawl a site starting from a URL (reports -> reports/crawl.html & crawl.json)
+# Crawl a site starting from a URL (reports -> var/reports/crawl.html & crawl.json)
 python -m autoscope.cli crawl --url https://example.com
 python -m autoscope.cli crawl --url https://example.com --username alice --password secret
 
@@ -77,23 +77,23 @@ python run_desktop.py
 - Screenshot helpers exist on the test case:
   - `self.web_screenshot(name)`
   - `self.mobile_screenshot(name)`
-- Failure screenshots are auto-captured to `reports/screenshots/` if `screenshot_on_failure` is enabled.
+- Failure screenshots are auto-captured to `var/reports/screenshots/` if `screenshot_on_failure` is enabled.
 
 ## Generated scripts & desktop app
 
 - The desktop recorder writes scripts to `scripts/`.
 - A generated script is a plain Python file with a `run()` function.
 - Its platform is detected from the first-line comment, e.g. `# platform: web` or `# platform: mobile`.
-- The desktop **Auto Run** tab executes these scripts in a subprocess via `autoscope/desktop/runner/script_runner.py` and writes `reports/auto_results.json` + `reports/auto_report.html`.
+- The desktop **Auto Run** tab executes these scripts in a subprocess via `autoscope/desktop/runner/script_runner.py` and writes `var/reports/auto_results.json` + `var/reports/auto_report.html`.
 - Playwright browsers and `adb` are **not bundled**; the app checks for them at startup and can prompt to install Chromium.
 
 ## Diagnostics & debugging
 
 One-off Playwright probes live at the repo root for quick debugging:
 
-- `diag_load.py <url>` — load a page and print status/title/URL.
-- `diag_login.py` — hardcoded target login flow probe (uses `CRAWL_USERNAME` / `CRAWL_PASSWORD`).
-- `diag_crawl_steps.py` — step-by-step login + link extraction probe.
+- `tools/diag_load.py <url>` — load a page and print status/title/URL.
+- `tools/diag_login.py` — hardcoded target login flow probe (uses `CRAWL_USERNAME` / `CRAWL_PASSWORD`).
+- `tools/diag_crawl_steps.py` — step-by-step login + link extraction probe.
 
 ## Gotchas
 
@@ -101,4 +101,4 @@ One-off Playwright probes live at the repo root for quick debugging:
 - Mobile tests require `adb` on PATH and a connected device. `device_serial: null` in config means "first available adb device".
 - Web tests require the selected Playwright browser to be installed separately (`playwright install ...`).
 - Crawl auto-login runs **only on the first page** and uses fallback selectors from `config.yaml` under `web.login_selectors`.
-- Build scripts (`build_macos.sh`, `build_linux.sh`, `build_windows.ps1`) just call `flet build ...`; see `pyproject.toml [tool.flet]` for product/artifact names.
+- Build scripts (`packaging/build_macos.sh`, `packaging/build_linux.sh`, `packaging/build_windows.ps1`) just call `flet build ...`; see `pyproject.toml [tool.flet]` for product/artifact names.

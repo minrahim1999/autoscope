@@ -60,6 +60,7 @@ class ScriptBuilder:
             "    page = driver.start()",
             "    try:",
         ]
+        body_start = len(lines)
 
         last_url: Optional[str] = None
         for act in self.actions:
@@ -82,6 +83,9 @@ class ScriptBuilder:
             elif act.action == "screenshot":
                 name = act.data.get("name", "screenshot.png")
                 lines.append(f"        driver.screenshot({self._quote(name)})")
+
+        if len(lines) == body_start:
+            lines.append("        pass")
 
         lines.extend(
             [
@@ -109,6 +113,7 @@ class ScriptBuilder:
             "    device = driver.start()",
             "    try:",
         ]
+        body_start = len(lines)
 
         for act in self.actions:
             if act.action == "tap":
@@ -134,6 +139,9 @@ class ScriptBuilder:
             elif act.action == "screenshot":
                 name = act.data.get("name", "screenshot.png")
                 lines.append(f"        driver.screenshot({self._quote(name)})")
+
+        if len(lines) == body_start:
+            lines.append("        pass")
 
         lines.extend(
             [

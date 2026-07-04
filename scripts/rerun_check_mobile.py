@@ -9,6 +9,7 @@ def run():
     driver = MobileDriver(config.mobile)
     device = driver.start()
     try:
+        pass
     finally:
         driver.stop()
 

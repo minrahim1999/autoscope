@@ -8,7 +8,7 @@ web:
     width: 1280
     height: 720
   screenshot_on_failure: true
-  screenshot_dir: reports/screenshots
+  screenshot_dir: var/reports/screenshots
   login_selectors:
     username: ["input[type='email']", "input[name='email']", "input[name='username']", "#username"]
     password: ["input[type='password']", "input[name='password']", "#password"]
@@ -22,11 +22,11 @@ mobile:
   install_apk: null        # path to apk to install before tests
   uninstall_before: false
   screenshot_on_failure: true
-  screenshot_dir: reports/screenshots
+  screenshot_dir: var/reports/screenshots
 
 runner:
-  output_dir: reports
-  json_report: reports/results.json
-  html_report: reports/report.html
+  output_dir: var/reports
+  json_report: var/reports/results.json
+  html_report: var/reports/report.html
   fail_fast: false
   verbosity: 2

@@ -15,7 +15,7 @@ class WebConfig:
     timeout_ms: int = 30000
     viewport: dict = field(default_factory=lambda: {"width": 1280, "height": 720})
     screenshot_on_failure: bool = True
-    screenshot_dir: str = "reports/screenshots"
+    screenshot_dir: str = "var/reports/screenshots"
     login_selectors: dict = field(default_factory=dict)
 
 
@@ -28,14 +28,14 @@ class MobileConfig:
     install_apk: Optional[str] = None
     uninstall_before: bool = False
     screenshot_on_failure: bool = True
-    screenshot_dir: str = "reports/screenshots"
+    screenshot_dir: str = "var/reports/screenshots"
 
 
 @dataclass
 class RunnerConfig:
-    output_dir: str = "reports"
-    json_report: str = "reports/results.json"
-    html_report: str = "reports/report.html"
+    output_dir: str = "var/reports"
+    json_report: str = "var/reports/results.json"
+    html_report: str = "var/reports/report.html"
     fail_fast: bool = False
     verbosity: int = 2
 

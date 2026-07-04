@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Light/dark theme toggle in the desktop app navigation rail.
 
 ### Fixed
+- Fixed the mobile recorder never showing the streamed device screen and dropping every tap/text input: `page.run_task()` requires an `async` coroutine in Flet 0.85 and was being called with plain sync functions (raised `TypeError`, silently swallowed in the streaming loop); tap coordinates were read from a nonexistent `TapEvent.local_x/local_y` (now `local_position.x/y`); and the live frame was assigned to a nonexistent `Image.src_base64` (now `Image.src`, which accepts a base64 data URI directly).
+- Fixed a startup/runtime crash from `ft.Colors.SUCCESS` / `ft.Colors.WARNING`, which don't exist in this Flet version (Material3 has no built-in success/warning role) — replaced with `ft.Colors.GREEN` / `ft.Colors.AMBER`. This fired unconditionally whenever `adb` wasn't detected, before the main window ever appeared.
+- Fixed generated recorder scripts being invalid Python (`SyntaxError`: empty `try:` block) when a manual recording session captured zero actions; `ScriptBuilder` now emits `pass` as a fallback body. Repaired three previously-committed scripts under `scripts/` that were broken this way.
+- Fixed `config/loader.py` dataclass defaults still pointing at the old `reports/` path after the project-wide move to `var/reports/`; a missing config.yaml would silently resurrect the old layout.
 - Fixed desktop app home page appearing empty on startup; navigation now refreshes the whole page once after building each view.
 - Fixed **Mobile Manual** and **Auto Run** tabs failing to open due to Flet 0.85 API changes (`ft.Image` now requires `src`, `ft.alignment.center` replaced with `ft.Alignment.CENTER`, snackbar uses `page.overlay`).
 - Fixed **Auto Run** script list throwing "Control must be added to the page first" during initial render.

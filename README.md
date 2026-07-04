@@ -65,7 +65,7 @@ The desktop app can be packaged into native installers using Flet's build comman
 Prerequisites: macOS, Xcode, CocoaPods, Flutter (auto-downloaded by Flet if missing).
 
 ```bash
-./build_macos.sh
+./packaging/build_macos.sh
 ```
 
 Outputs:
@@ -79,17 +79,17 @@ If `create-dmg` is not installed, the script installs it via Homebrew.
 Prerequisites: Windows, Visual Studio with "Desktop development with C++" workload, Flutter.
 
 ```powershell
-.\build_windows.ps1
+.\packaging\build_windows.ps1
 ```
 
 Output: `build/windows/`
 
 ### Linux
 
-Prerequisites: Linux, Flutter, GTK/build libraries (see `build_linux.sh` comments).
+Prerequisites: Linux, Flutter, GTK/build libraries (see `packaging/build_linux.sh` comments).
 
 ```bash
-./build_linux.sh
+./packaging/build_linux.sh
 ```
 
 Output: `build/linux/`
@@ -141,7 +141,7 @@ Limit scope:
 python -m autoscope.cli crawl --url https://example.com --max-depth 2 --max-pages 20
 ```
 
-Crawl reports are written to `reports/crawl.html` and `reports/crawl.json`.
+Crawl reports are written to `var/reports/crawl.html` and `var/reports/crawl.json`.
 
 ## Configuration
 

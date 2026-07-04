@@ -33,7 +33,7 @@ with sync_playwright() as p:
     print("after re-goto status", response.status if response else None, "url", page.url)
 
     print("screenshot")
-    shot = Path("reports/screenshots/diag.png")
+    shot = Path("var/reports/screenshots/diag.png")
     shot.parent.mkdir(parents=True, exist_ok=True)
     page.screenshot(path=str(shot))
     print("screenshot saved", shot)

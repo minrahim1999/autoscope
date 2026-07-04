@@ -27,7 +27,7 @@ def get_scripts_dir() -> Path:
 
 
 def get_reports_dir() -> Path:
-    path = get_app_dir() / "reports"
+    path = get_app_dir() / "var" / "reports"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
